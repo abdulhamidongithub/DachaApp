@@ -1,9 +1,103 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>{% if form.instance.pk %}Edit{% else %}New{% endif %} booking</h2>
-  <form method="post">
+  <h1>{% if form.instance.pk %}Edit{% else %}New{% endif %} booking</h1>
+
+  <form method="post" id="booking-form" style="max-width: 480px;">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
+    <p>{{ form.room.label_tag }} {{ form.room }}</p>
+    <p>{{ form.guest_name.label_tag }} {{ form.guest_name }}</p>
+    <p>{{ form.guest_phone.label_tag }} {{ form.guest_phone }}</p>
+
+    <p>
+      <label>Date</label>
+      <div id="calendar" style="border:1px solid var(--border); border-radius:6px; padding:1rem; background:#fff;"></div>
+      <div style="display:flex; gap:1rem; margin-top:0.6rem; font-size:0.82rem; color:var(--ink-soft);">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--available);"></span> Open</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--booked);"></span> Booked</span>
+      </div>
+    </p>
+    {{ form.date }}
+
+    <p>{{ form.total_price.label_tag }} {{ form.total_price }}</p>
+    <p>{{ form.prepaid_amount.label_tag }} {{ form.prepaid_amount }}</p>
+    <p>{{ form.notes.label_tag }} {{ form.notes }}</p>
+    <button type="submit" class="btn">Save booking</button>
   </form>
+
+  <style>
+    #id_date { display: none; }
+    .cal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; font-family:'Fraunces',serif; }
+    .cal-head button { background:none; border:none; font-size:1.1rem; cursor:pointer; color: var(--primary); }
+    .cal-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-day, .cal-dow { text-align:center; font-size:0.82rem; padding:0.4rem 0; border-radius:4px; }
+    .cal-dow { color: var(--ink-soft); }
+    .cal-day { cursor:pointer; background:#F5F1E8; }
+    .cal-day.empty { background:none; cursor:default; }
+    .cal-day.past { color:#C9C2AE; cursor:not-allowed; }
+    .cal-day.open:hover { outline: 1px solid var(--available); }
+    .cal-day.booked { background: var(--booked); color:#fff; cursor:not-allowed; }
+    .cal-day.selected { background: var(--available); color:#fff; }
+  </style>
+
+  <script>
+    const roomSelect = document.getElementById('id_room');
+    const dateInput = document.getElementById('id_date');
+    const calendarEl = document.getElementById('calendar');
+    const excludeId = "{{ form.instance.pk|default:'' }}";
+
+    let bookedDates = new Set();
+    let viewDate = dateInput.value ? new Date(dateInput.value) : new Date();
+    let selected = dateInput.value || null;
+
+    async function loadBookedDates() {
+      bookedDates = new Set();
+      if (!roomSelect.value) return renderCalendar();
+      const url = `/rooms/${roomSelect.value}/booked-dates/` + (excludeId ? `?exclude=${excludeId}` : '');
+      const res = await fetch(url);
+      const data = await res.json();
+      bookedDates = new Set(data.booked);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = viewDate.getFullYear(), month = viewDate.getMonth();
+      const first = new Date(year, month, 1);
+      const startDay = first.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      let html = `<div class="cal-head">
+        <button type="button" id="prevMonth">‹</button>
+        <span>${first.toLocaleString('default', { month: 'long' })} ${year}</span>
+        <button type="button" id="nextMonth">›</button>
+      </div><div class="cal-grid">`;
+      ['S','M','T','W','T','F','S'].forEach(d => html += `<div class="cal-dow">${d}</div>`);
+      for (let i = 0; i < startDay; i++) html += `<div class="cal-day empty"></div>`;
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        let cls = 'cal-day';
+        if (dateStr < todayStr) cls += ' past';
+        else if (bookedDates.has(dateStr)) cls += ' booked';
+        else cls += ' open';
+        if (dateStr === selected) cls += ' selected';
+        html += `<div class="${cls}" data-date="${dateStr}">${d}</div>`;
+      }
+      html += `</div>`;
+      calendarEl.innerHTML = html;
+
+      document.getElementById('prevMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() - 1); renderCalendar(); };
+      document.getElementById('nextMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() + 1); renderCalendar(); };
+      calendarEl.querySelectorAll('.cal-day.open').forEach(el => {
+        el.onclick = () => {
+          selected = el.dataset.date;
+          dateInput.value = selected;
+          renderCalendar();
+        };
+      });
+    }
+
+    roomSelect.addEventListener('change', loadBookedDates);
+    loadBookedDates();
+  </script>
 {% endblock %}

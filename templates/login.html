@@ -1,9 +1,45 @@
-{% extends "base.html" %}
-{% block content %}
-  <h2>Log in</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Log in</button>
-  </form>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in — Resort Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: #2F4B3C; font-family: 'Inter', sans-serif;
+    }
+    .card {
+      background: #F5F1E8; padding: 2.75rem 2.5rem; border-radius: 8px;
+      width: 100%; max-width: 360px;
+    }
+    .card h1 { font-family: 'Fraunces', serif; font-size: 1.6rem; color: #1E2A25; margin: 0 0 0.3rem; }
+    .card p.tag { color: #5B6660; margin: 0 0 1.75rem; font-size: 0.92rem; }
+    label { display: block; font-size: 0.85rem; color: #5B6660; margin-bottom: 0.25rem; }
+    input { width: 100%; padding: 0.6rem 0.7rem; margin-bottom: 1rem; border: 1px solid #E2DBC9; border-radius: 6px; font-size: 0.95rem; }
+    button {
+      width: 100%; padding: 0.65rem; background: #C9A05C; color: #fff; border: none;
+      border-radius: 6px; font-size: 0.95rem; cursor: pointer;
+    }
+    button:hover { filter: brightness(0.95); }
+    .errorlist { color: #B9483A; font-size: 0.85rem; list-style: none; padding: 0; margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Resort Manager</h1>
+    <p class="tag">Sign in to manage bookings</p>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.errors %}<ul class="errorlist"><li>Incorrect username or password.</li></ul>{% endif %}
+      <label for="id_username">Username</label>
+      <input type="text" name="username" id="id_username" required>
+      <label for="id_password">Password</label>
+      <input type="password" name="password" id="id_password" required>
+      <button type="submit">Log in</button>
+    </form>
+  </div>
+</body>
+</html>

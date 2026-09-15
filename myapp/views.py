@@ -5,10 +5,19 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
+from django.http import JsonResponse
 
 from .forms import BookingForm, RoomForm
 from .models import Booking, Room
 
+class RoomBookedDatesView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        exclude_id = request.GET.get("exclude")
+        qs = Booking.objects.filter(room_id=pk, is_cancelled=False)
+        if exclude_id:
+            qs = qs.exclude(pk=exclude_id)
+        dates = qs.values_list("date", flat=True)
+        return JsonResponse({"booked": [d.isoformat() for d in dates]})
 
 class BookingListView(LoginRequiredMixin, ListView):
     """Shows today's bookings by default; ?date= and ?q= filter it."""

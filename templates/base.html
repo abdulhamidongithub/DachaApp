@@ -2,29 +2,112 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}Resort{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Resort Manager{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    nav a { margin-right: 1rem; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.4rem; border-bottom: 1px solid #ddd; }
-    form p { margin: 0.5rem 0; }
-    .paid { color: green; } .unpaid { color: #b00; }
-    button { cursor: pointer; }
+    :root {
+      --bg: #F5F1E8;
+      --surface: #FFFFFF;
+      --ink: #1E2A25;
+      --ink-soft: #5B6660;
+      --primary: #2F4B3C;
+      --primary-light: #6B8F7A;
+      --accent: #C9A05C;
+      --booked: #B9483A;
+      --available: #3E7C7C;
+      --border: #E2DBC9;
+      --radius: 6px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      display: flex;
+      min-height: 100vh;
+    }
+    h1, h2, h3, .brand { font-family: 'Fraunces', serif; font-weight: 600; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--primary);
+      color: #EFE9DA;
+      padding: 1.75rem 1.25rem;
+      flex-shrink: 0;
+    }
+    .sidebar .brand { font-size: 1.4rem; color: #fff; margin: 0 0 2rem; }
+    .sidebar nav { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sidebar nav a {
+      color: #D7E0D4;
+      text-decoration: none;
+      padding: 0.5rem 0.6rem;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+    }
+    .sidebar nav a:hover, .sidebar nav a.active { background: rgba(255,255,255,0.1); color: #fff; }
+    .sidebar form { margin-top: 2rem; }
+    .sidebar button.logout {
+      background: none; border: 1px solid rgba(255,255,255,0.25);
+      color: #D7E0D4; padding: 0.45rem 0.7rem; border-radius: var(--radius);
+      font-size: 0.85rem; cursor: pointer; width: 100%;
+    }
+    .sidebar button.logout:hover { background: rgba(255,255,255,0.1); }
+
+    /* Main content */
+    main { flex: 1; padding: 2.5rem 3rem; max-width: 980px; }
+    main h1 { font-size: 1.9rem; margin: 0 0 1.5rem; }
+
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+    th, td { text-align: left; padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+    th { color: var(--ink-soft); font-weight: 500; font-size: 0.82rem; }
+    tr:last-child td { border-bottom: none; }
+
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.8rem; }
+    .badge.paid { background: #E4EEE9; color: var(--available); }
+    .badge.unpaid { background: #F6E5E1; color: var(--booked); }
+
+    .btn {
+      display: inline-block; background: var(--accent); color: #fff;
+      border: none; padding: 0.55rem 1.1rem; border-radius: var(--radius);
+      font-size: 0.92rem; cursor: pointer; text-decoration: none;
+    }
+    .btn:hover { filter: brightness(0.95); }
+    .btn-quiet { background: none; border: 1px solid var(--border); color: var(--ink); }
+
+    form p { margin: 0.85rem 0; }
+    label { display: block; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.25rem; }
+    input[type=text], input[type=tel], input[type=number], input[type=password], textarea, select {
+      width: 100%; padding: 0.55rem 0.7rem; border: 1px solid var(--border);
+      border-radius: var(--radius); font-family: inherit; font-size: 0.95rem;
+      background: var(--surface);
+    }
+    input:focus, select:focus, textarea:focus, button:focus, a:focus {
+      outline: 2px solid var(--available); outline-offset: 1px;
+    }
+
+    .toolbar { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
   </style>
 </head>
 <body>
-  <nav>
-  <a href="{% url 'booking-list' %}">Bookings</a>
-  <a href="{% url 'room-list' %}">Rooms</a>
-  {% if user.is_authenticated %}
-    <form method="post" action="{% url 'logout' %}" style="display:inline; float:right;">
+  <aside class="sidebar">
+    <p class="brand">Resort Manager</p>
+    <nav>
+      <a href="{% url 'booking-list' %}">Bookings</a>
+      <a href="{% url 'room-list' %}">Rooms</a>
+    </nav>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
       {% csrf_token %}
-      <button type="submit">Log out ({{ user.username }})</button>
+      <button type="submit" class="logout">Log out ({{ user.username }})</button>
     </form>
-  {% endif %}
-</nav>
-  <hr>
-  {% block content %}{% endblock %}
+    {% endif %}
+  </aside>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
 </body>
 </html>
