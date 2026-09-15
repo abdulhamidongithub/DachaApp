@@ -1,22 +1,20 @@
-"""
-URL configuration for DachaCRM project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
 from django.urls import path
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
+
+from myapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", views.BookingListView.as_view(), name="booking-list"),
+    path("bookings/add/", views.BookingCreateView.as_view(), name="booking-add"),
+    path("bookings/<int:pk>/edit/", views.BookingUpdateView.as_view(), name="booking-edit"),
+    path("bookings/<int:pk>/cancel/", views.BookingCancelView.as_view(), name="booking-cancel"),
+    path("bookings/<int:pk>/mark-paid/", views.BookingMarkPaidView.as_view(), name="booking-mark-paid"),
+
+    path("rooms/", views.RoomListView.as_view(), name="room-list"),
+    path("rooms/add/", views.RoomCreateView.as_view(), name="room-add"),
+    path("rooms/<int:pk>/edit/", views.RoomUpdateView.as_view(), name="room-edit"),
+    path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]

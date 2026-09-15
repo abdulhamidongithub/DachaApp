@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Bookings — {{ selected_date }}</h2>
+
+  <form method="get" style="margin-bottom: 1rem;">
+    <input type="date" name="date" value="{{ selected_date }}">
+    <input type="text" name="q" placeholder="Search name or phone" value="{{ request.GET.q }}">
+    <button type="submit">Filter</button>
+    <a href="{% url 'booking-list' %}">Today</a>
+    <a href="{% url 'booking-add' %}" style="float:right;">+ New booking</a>
+  </form>
+
+  <table>
+    <tr><th>Room</th><th>Guest</th><th>Phone</th><th>Total</th><th>Prepaid</th><th>Status</th><th></th></tr>
+    {% for b in bookings %}
+    <tr>
+      <td>{{ b.room }}</td>
+      <td>{{ b.guest_name }}</td>
+      <td>{{ b.guest_phone }}</td>
+      <td>{{ b.total_price }}</td>
+      <td>{{ b.prepaid_amount }}</td>
+      <td class="{% if b.paid_in_full %}paid{% else %}unpaid{% endif %}">
+        {% if b.paid_in_full %}Paid{% else %}Owes {{ b.balance_due }}{% endif %}
+      </td>
+      <td>
+        <a href="{% url 'booking-edit' b.pk %}">Edit</a>
+        {% if not b.paid_in_full %}
+        <form method="post" action="{% url 'booking-mark-paid' b.pk %}" style="display:inline;">
+          {% csrf_token %}<button type="submit">Mark paid</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'booking-cancel' b.pk %}" style="display:inline;">
+          {% csrf_token %}<button type="submit">Cancel</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7">No bookings.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

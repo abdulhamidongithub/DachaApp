@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Resort{% endblock %}</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    nav a { margin-right: 1rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.4rem; border-bottom: 1px solid #ddd; }
+    form p { margin: 0.5rem 0; }
+    .paid { color: green; } .unpaid { color: #b00; }
+    button { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <nav>
+  <a href="{% url 'booking-list' %}">Bookings</a>
+  <a href="{% url 'room-list' %}">Rooms</a>
+  {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}" style="display:inline; float:right;">
+      {% csrf_token %}
+      <button type="submit">Log out ({{ user.username }})</button>
+    </form>
+  {% endif %}
+</nav>
+  <hr>
+  {% block content %}{% endblock %}
+</body>
+</html>
