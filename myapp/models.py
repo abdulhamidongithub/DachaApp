@@ -72,4 +72,15 @@ class Booking(models.Model):
             return 0
         return self.total_price - self.prepaid_amount
 
+class Expense(models.Model):
+    payment = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.CharField(max_length=30)
+    note = models.TextField(blank=True, null=True)
+    date = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="expenses_created"
+    )
+    def __str__(self):
+        return f"{self.payment} | {self.date} | {self.user.username}"
+
 
