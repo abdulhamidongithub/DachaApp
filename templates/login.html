@@ -29,17 +29,17 @@
 </head>
 <body>
   <div class="card">
-    <h1>Resort Manager</h1>
-    <p class="tag">Sign in to manage bookings</p>
-    <form method="post">
-      {% csrf_token %}
-      {% if form.errors %}<ul class="errorlist"><li>Incorrect username or password.</li></ul>{% endif %}
-      <label for="id_username">Username</label>
-      <input type="text" name="username" id="id_username" required>
-      <label for="id_password">Password</label>
-      <input type="password" name="password" id="id_password" required>
-      <button type="submit">Log in</button>
-    </form>
+    <h1>Dacha boshqaruv tizimi</h1>
+<p class="tag">Tizimga kirish</p>
+<form method="post">
+  {% csrf_token %}
+  {% if form.errors %}<ul class="errorlist"><li>Login yoki parol noto'g'ri.</li></ul>{% endif %}
+  <label for="id_username">Foydalanuvchi nomi</label>
+  <input type="text" name="username" id="id_username" required>
+  <label for="id_password">Parol</label>
+  <input type="password" name="password" id="id_password" required>
+  <button type="submit">Kirish</button>
+</form>
   </div>
 </body>
 </html>

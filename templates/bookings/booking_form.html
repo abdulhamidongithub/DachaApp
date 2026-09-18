@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>{% if form.instance.pk %}Edit{% else %}New{% endif %} booking</h1>
+  <h1>{% if form.instance.pk %}Bandlovni tahrirlash{% else %}Yangi bandlov{% endif %}</h1>
 
   <form method="post" id="booking-form" style="max-width: 480px;">
     {% csrf_token %}
@@ -9,11 +9,11 @@
     <p>{{ form.guest_phone.label_tag }} {{ form.guest_phone }}</p>
 
     <p>
-      <label>Date</label>
+      <label>Sana</label>
       <div id="calendar" style="border:1px solid var(--border); border-radius:6px; padding:1rem; background:#fff;"></div>
       <div style="display:flex; gap:1rem; margin-top:0.6rem; font-size:0.82rem; color:var(--ink-soft);">
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--available);"></span> Open</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--booked);"></span> Booked</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--available);"></span> Bo'sh</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--booked);"></span> Band</span>
       </div>
     </p>
     {{ form.date }}
@@ -21,7 +21,7 @@
     <p>{{ form.total_price.label_tag }} {{ form.total_price }}</p>
     <p>{{ form.prepaid_amount.label_tag }} {{ form.prepaid_amount }}</p>
     <p>{{ form.notes.label_tag }} {{ form.notes }}</p>
-    <button type="submit" class="btn">Save booking</button>
+    <button type="submit" class="btn">Bandlovni saqlash</button>
   </form>
 
   <style>
@@ -37,6 +37,9 @@
     .cal-day.open:hover { outline: 1px solid var(--available); }
     .cal-day.booked { background: var(--booked); color:#fff; cursor:not-allowed; }
     .cal-day.selected { background: var(--available); color:#fff; }
+    @media (max-width: 480px) {
+      .cal-day, .cal-dow { font-size: 0.72rem; padding: 0.3rem 0; }
+    }
   </style>
 
   <script>
@@ -44,6 +47,9 @@
     const dateInput = document.getElementById('id_date');
     const calendarEl = document.getElementById('calendar');
     const excludeId = "{{ form.instance.pk|default:'' }}";
+
+    const OY_NOMLARI = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+    const HAFTA_KUNLARI = ['Ya','Du','Se','Cho','Pa','Ju','Sh'];
 
     let bookedDates = new Set();
     let viewDate = dateInput.value ? new Date(dateInput.value) : new Date();
@@ -68,10 +74,10 @@
 
       let html = `<div class="cal-head">
         <button type="button" id="prevMonth">‹</button>
-        <span>${first.toLocaleString('default', { month: 'long' })} ${year}</span>
+        <span>${OY_NOMLARI[month]} ${year}</span>
         <button type="button" id="nextMonth">›</button>
       </div><div class="cal-grid">`;
-      ['S','M','T','W','T','F','S'].forEach(d => html += `<div class="cal-dow">${d}</div>`);
+      HAFTA_KUNLARI.forEach(d => html += `<div class="cal-dow">${d}</div>`);
       for (let i = 0; i < startDay; i++) html += `<div class="cal-day empty"></div>`;
 
       for (let d = 1; d <= daysInMonth; d++) {

@@ -94,18 +94,18 @@
 </head>
 <body>
   <aside class="sidebar">
-    <p class="brand">Resort Manager</p>
-    <nav>
-      <a href="{% url 'booking-list' %}">Bookings</a>
-      <a href="{% url 'room-list' %}">Rooms</a>
-    </nav>
-    {% if user.is_authenticated %}
-    <form method="post" action="{% url 'logout' %}">
-      {% csrf_token %}
-      <button type="submit" class="logout">Log out ({{ user.username }})</button>
-    </form>
-    {% endif %}
-  </aside>
+  <p class="brand">Kurort Tizimi</p>
+  <nav>
+    <a href="{% url 'booking-list' %}">Bandlovlar</a>
+    <a href="{% url 'room-list' %}">Xonalar</a>
+  </nav>
+  {% if user.is_authenticated %}
+  <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="logout">Chiqish ({{ user.username }})</button>
+  </form>
+  {% endif %}
+</aside>
   <main>
     {% block content %}{% endblock %}
   </main>

@@ -1,19 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Bookings — {{ selected_date }}</h1>
+  <h1>Bandlovlar — {{ selected_date }}</h1>
 
   <div class="toolbar">
     <form method="get" style="display:flex; gap:0.5rem;">
       <input type="date" name="date" value="{{ selected_date }}">
-      <input type="text" name="q" placeholder="Search name or phone" value="{{ request.GET.q }}">
-      <button type="submit" class="btn btn-quiet">Filter</button>
+      <input type="text" name="q" placeholder="Ism yoki telefon bo'yicha qidirish" value="{{ request.GET.q }}">
+      <button type="submit" class="btn btn-quiet">Filtrlash</button>
     </form>
-    <a href="{% url 'booking-list' %}" class="btn btn-quiet">Today</a>
-    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">New booking</a>
+    <a href="{% url 'booking-list' %}" class="btn btn-quiet">Bugun</a>
+    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi bandlov</a>
   </div>
 
+  <div class="table-responsive">
   <table>
-    <tr><th>Room</th><th>Guest</th><th>Phone</th><th>Total</th><th>Prepaid</th><th>Status</th><th></th></tr>
+    <tr><th>Xona</th><th>Mehmon</th><th>Telefon</th><th>Umumiy</th><th>Oldindan</th><th>Holat</th><th></th></tr>
     {% for b in bookings %}
     <tr>
       <td>{{ b.room }}</td>
@@ -22,23 +23,24 @@
       <td>{{ b.total_price }}</td>
       <td>{{ b.prepaid_amount }}</td>
       <td>
-        {% if b.paid_in_full %}<span class="badge paid">Paid</span>
-        {% else %}<span class="badge unpaid">Owes {{ b.balance_due }}</span>{% endif %}
+        {% if b.paid_in_full %}<span class="badge paid">To'langan</span>
+        {% else %}<span class="badge unpaid">Qarz: {{ b.balance_due }}</span>{% endif %}
       </td>
       <td>
-        <a href="{% url 'booking-edit' b.pk %}">Edit</a>
+        <a href="{% url 'booking-edit' b.pk %}">Tahrirlash</a>
         {% if not b.paid_in_full %}
         <form method="post" action="{% url 'booking-mark-paid' b.pk %}" style="display:inline;">
-          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">Mark paid</button>
+          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">To'landi</button>
         </form>
         {% endif %}
         <form method="post" action="{% url 'booking-cancel' b.pk %}" style="display:inline;">
-          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">Cancel</button>
+          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">Bekor qilish</button>
         </form>
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="7" style="color:var(--ink-soft);">No bookings for this day yet.</td></tr>
+    <tr><td colspan="7" style="color:var(--ink-soft);">Bu kun uchun hali bandlov yo'q.</td></tr>
     {% endfor %}
   </table>
+  </div>
 {% endblock %}
