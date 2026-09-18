@@ -107,15 +107,24 @@
   .toolbar a.btn, .toolbar a.btn-quiet { margin-left: 0 !important; width: 100%; text-align: center; }
   table { min-width: 540px; }
 }
+    input[type=text], input[type=tel], input[type=number], input[type=password], input[type=date], textarea, select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: var(--surface);
+}
   </style>
 </head>
 <body>
   <aside class="sidebar">
-  <p class="brand">Kurort Tizimi</p>
+  <p class="brand">Dacha CRM</p>
   <nav>
-    <a href="{% url 'booking-list' %}">Bandlovlar</a>
-    <a href="{% url 'room-list' %}">Xonalar</a>
-  </nav>
+  <a href="{% url 'booking-list' %}" class="{% if '/rooms/' not in request.path %}active{% endif %}">Jadval</a>
+  <a href="{% url 'room-list' %}" class="{% if '/rooms/' in request.path %}active{% endif %}">Xonalar</a>
+</nav>
   {% if user.is_authenticated %}
   <form method="post" action="{% url 'logout' %}">
     {% csrf_token %}

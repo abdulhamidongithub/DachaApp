@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Bandlovlar — {{ selected_date }}</h1>
+  <h1>Jadval — {{ selected_date }}</h1>
 
   <div class="toolbar">
-    <form method="get" style="display:flex; gap:0.5rem;">
-      <input type="date" name="date" value="{{ selected_date }}">
-      <input type="text" name="q" placeholder="Ism yoki telefon bo'yicha qidirish" value="{{ request.GET.q }}">
-      <button type="submit" class="btn btn-quiet">Filtrlash</button>
-    </form>
+   <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+  <input type="date" name="date" value="{{ selected_date }}" style="width:170px;">
+  <input type="text" name="q" placeholder="Ism yoki telefon bo'yicha qidirish" value="{{ request.GET.q }}" style="flex:1; min-width:160px;">
+  <button type="submit" class="btn btn-quiet">Qidirish</button>
+</form>
     <a href="{% url 'booking-list' %}" class="btn btn-quiet">Bugun</a>
-    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi bandlov</a>
+    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi xona band qilish</a>
   </div>
 
   <div class="table-responsive">
   <table>
-    <tr><th>Xona</th><th>Mehmon</th><th>Telefon</th><th>Umumiy</th><th>Oldindan</th><th>Holat</th><th></th></tr>
+    <tr><th>Xona</th><th>Mehmon</th><th>Telefon</th><th>Umumiy to'lov</th><th>Oldindan to'lov</th><th>Holat</th><th></th></tr>
     {% for b in bookings %}
     <tr>
       <td>{{ b.room }}</td>
@@ -39,7 +39,7 @@
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="7" style="color:var(--ink-soft);">Bu kun uchun hali bandlov yo'q.</td></tr>
+    <tr><td colspan="7" style="color:var(--ink-soft);">Bu kun uchun hali xona band qilinmagan.</td></tr>
     {% endfor %}
   </table>
   </div>

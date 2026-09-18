@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>{% if form.instance.pk %}Bandlovni tahrirlash{% else %}Yangi bandlov{% endif %}</h1>
+  <h1>{% if form.instance.pk %}Tahrirlash{% else %}Yangi joy band qilish{% endif %}</h1>
 
   <form method="post" id="booking-form" style="max-width: 480px;">
     {% csrf_token %}
@@ -21,7 +21,7 @@
     <p>{{ form.total_price.label_tag }} {{ form.total_price }}</p>
     <p>{{ form.prepaid_amount.label_tag }} {{ form.prepaid_amount }}</p>
     <p>{{ form.notes.label_tag }} {{ form.notes }}</p>
-    <button type="submit" class="btn">Bandlovni saqlash</button>
+    <button type="submit" class="btn">Saqlash</button>
   </form>
 
   <style>
