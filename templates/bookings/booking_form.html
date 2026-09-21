@@ -1,31 +1,78 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>{% if form.instance.pk %}Tahrirlash{% else %}Yangi joy band qilish{% endif %}</h1>
+  <h1>{% if form.instance.pk %}Bandlovni tahrirlash{% else %}Yangi bandlov{% endif %}</h1>
 
-  <form method="post" id="booking-form" style="max-width: 480px;">
+  <form method="post" id="booking-form" style="max-width: 520px;">
     {% csrf_token %}
-    <p>{{ form.room.label_tag }} {{ form.room }}</p>
     <p>{{ form.guest_name.label_tag }} {{ form.guest_name }}</p>
     <p>{{ form.guest_phone.label_tag }} {{ form.guest_phone }}</p>
 
     <p>
-      <label>Sana</label>
-      <div id="calendar" style="border:1px solid var(--border); border-radius:6px; padding:1rem; background:#fff;"></div>
-      <div style="display:flex; gap:1rem; margin-top:0.6rem; font-size:0.82rem; color:var(--ink-soft);">
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--available);"></span> Bo'sh</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--booked);"></span> Band</span>
+      <label>Xona</label>
+      <div id="room-pills">
+        {% for r in rooms %}
+        <span class="room-pill {% if form.instance.room_id == r.pk %}selected{% endif %}" data-room-id="{{ r.pk }}">{{ r }}</span>
+        {% endfor %}
       </div>
     </p>
-    {{ form.date }}
+    {{ form.room }}
+
+    <p>
+      <label>Sanalar (birinchi kun — kirish, ikkinchi bosgan kun — oxirgi tun)</label>
+      <div id="calendar" style="border:1px solid var(--border); border-radius:6px; padding:1rem; background:#fff;"></div>
+      <div style="display:flex; gap:1rem; margin-top:0.6rem; font-size:0.82rem; color:var(--ink-soft);">
+        <span><span class="legend-dot" style="background:var(--available);"></span> Bo'sh</span>
+        <span><span class="legend-dot" style="background:var(--booked);"></span> Band</span>
+        <span><span class="legend-dot" style="background:#DCEDEA;"></span> Tanlangan oraliq</span>
+      </div>
+    </p>
+    {{ form.check_in }}
+    {{ form.check_out }}
 
     <p>{{ form.total_price.label_tag }} {{ form.total_price }}</p>
-    <p>{{ form.prepaid_amount.label_tag }} {{ form.prepaid_amount }}</p>
+    <p>{{ form.discount_amount.label_tag }} {{ form.discount_amount }}</p>
     <p>{{ form.notes.label_tag }} {{ form.notes }}</p>
-    <button type="submit" class="btn">Saqlash</button>
+    <button type="submit" class="btn">Bandlovni saqlash</button>
   </form>
 
+  {% if form.instance.pk %}
+  <hr style="margin:2rem 0; border-color: var(--border);">
+  <h3>To'lovlar</h3>
+  <table>
+    <tr><th>Sana</th><th>Summa</th><th>Izoh</th></tr>
+    {% for p in payments %}
+    <tr><td>{{ p.paid_at|date:"d.m.Y H:i" }}</td><td>{{ p.amount }}</td><td>{{ p.note }}</td></tr>
+    {% empty %}
+    <tr><td colspan="3" style="color:var(--ink-soft);">Hali to'lov yo'q.</td></tr>
+    {% endfor %}
+    <tr><td colspan="2"><strong>Jami to'langan</strong></td><td><strong>{{ form.instance.amount_paid }}</strong></td></tr>
+    <tr><td colspan="2"><strong>Qoldiq</strong></td><td><strong>{{ form.instance.balance_due }}</strong></td></tr>
+  </table>
+
+  <form method="post" action="{% url 'booking-add-payment' form.instance.pk %}" style="display:flex; gap:0.5rem; align-items:flex-end; margin-top:0.75rem;">
+    {% csrf_token %}
+    <div>{{ payment_form.amount.label_tag }} {{ payment_form.amount }}</div>
+    <div style="flex:1;">{{ payment_form.note.label_tag }} {{ payment_form.note }}</div>
+    <button type="submit" class="btn btn-quiet">To'lov qo'shish</button>
+  </form>
+
+  {% if form.instance.balance_due > 0 %}
+  <form method="post" action="{% url 'booking-settle' form.instance.pk %}" style="margin-top:0.5rem;">
+    {% csrf_token %}
+    <button type="submit" class="btn">Qoldiqni to'liq to'lash ({{ form.instance.balance_due }})</button>
+  </form>
+  {% endif %}
+  {% endif %}
+
   <style>
-    #id_date { display: none; }
+    #id_room, #id_check_in, #id_check_out { display: none; }
+    .room-pill {
+      display: inline-block; padding: 0.4rem 0.9rem; margin: 0.2rem 0.3rem 0.2rem 0;
+      border: 1px solid var(--border); border-radius: 999px; cursor: pointer; font-size: 0.9rem;
+    }
+    .room-pill.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .room-pill:hover { border-color: var(--available); }
+    .legend-dot { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:0.2rem; }
     .cal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; font-family:'Fraunces',serif; }
     .cal-head button { background:none; border:none; font-size:1.1rem; cursor:pointer; color: var(--primary); }
     .cal-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -37,32 +84,64 @@
     .cal-day.open:hover { outline: 1px solid var(--available); }
     .cal-day.booked { background: var(--booked); color:#fff; cursor:not-allowed; }
     .cal-day.selected { background: var(--available); color:#fff; }
-    @media (max-width: 480px) {
-      .cal-day, .cal-dow { font-size: 0.72rem; padding: 0.3rem 0; }
-    }
+    .cal-day.in-range { background: #DCEDEA; }
+    @media (max-width: 480px) { .cal-day, .cal-dow { font-size: 0.72rem; padding: 0.3rem 0; } }
   </style>
 
   <script>
-    const roomSelect = document.getElementById('id_room');
-    const dateInput = document.getElementById('id_date');
+    const roomInput = document.getElementById('id_room');
+    const checkInInput = document.getElementById('id_check_in');
+    const checkOutInput = document.getElementById('id_check_out');
     const calendarEl = document.getElementById('calendar');
     const excludeId = "{{ form.instance.pk|default:'' }}";
 
     const OY_NOMLARI = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
     const HAFTA_KUNLARI = ['Ya','Du','Se','Cho','Pa','Ju','Sh'];
 
+    let selectedRoomId = roomInput.value || null;
+    let previewRoomId = null;
     let bookedDates = new Set();
-    let viewDate = dateInput.value ? new Date(dateInput.value) : new Date();
-    let selected = dateInput.value || null;
+    let viewDate = checkInInput.value ? new Date(checkInInput.value) : new Date();
 
-    async function loadBookedDates() {
+    let rangeStart = checkInInput.value || null;
+    let rangeEnd = null;
+    if (checkInInput.value && checkOutInput.value) {
+      const co = new Date(checkOutInput.value);
+      co.setDate(co.getDate() - 1);
+      rangeEnd = co.toISOString().slice(0, 10);
+    }
+
+    function activeRoomId() { return previewRoomId || selectedRoomId; }
+
+    async function loadBookedDates(roomId) {
       bookedDates = new Set();
-      if (!roomSelect.value) return renderCalendar();
-      const url = `/rooms/${roomSelect.value}/booked-dates/` + (excludeId ? `?exclude=${excludeId}` : '');
+      if (!roomId) return renderCalendar();
+      const url = `/rooms/${roomId}/booked-dates/` + (excludeId ? `?exclude=${excludeId}` : '');
       const res = await fetch(url);
       const data = await res.json();
       bookedDates = new Set(data.booked);
       renderCalendar();
+    }
+
+    function isRangeClear(startStr, endStr) {
+      let d = new Date(startStr);
+      const end = new Date(endStr);
+      while (d <= end) {
+        if (bookedDates.has(d.toISOString().slice(0, 10))) return false;
+        d.setDate(d.getDate() + 1);
+      }
+      return true;
+    }
+
+    function updateHiddenDates() {
+      checkInInput.value = rangeStart || '';
+      if (rangeEnd) {
+        const co = new Date(rangeEnd);
+        co.setDate(co.getDate() + 1);
+        checkOutInput.value = co.toISOString().slice(0, 10);
+      } else {
+        checkOutInput.value = '';
+      }
     }
 
     function renderCalendar() {
@@ -81,12 +160,13 @@
       for (let i = 0; i < startDay; i++) html += `<div class="cal-day empty"></div>`;
 
       for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         let cls = 'cal-day';
         if (dateStr < todayStr) cls += ' past';
         else if (bookedDates.has(dateStr)) cls += ' booked';
         else cls += ' open';
-        if (dateStr === selected) cls += ' selected';
+        if (rangeStart === dateStr || rangeEnd === dateStr) cls += ' selected';
+        if (rangeStart && rangeEnd && dateStr > rangeStart && dateStr < rangeEnd) cls += ' in-range';
         html += `<div class="${cls}" data-date="${dateStr}">${d}</div>`;
       }
       html += `</div>`;
@@ -94,16 +174,46 @@
 
       document.getElementById('prevMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() - 1); renderCalendar(); };
       document.getElementById('nextMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() + 1); renderCalendar(); };
+
       calendarEl.querySelectorAll('.cal-day.open').forEach(el => {
         el.onclick = () => {
-          selected = el.dataset.date;
-          dateInput.value = selected;
+          if (!activeRoomId()) { alert("Avval xonani tanlang."); return; }
+          const clicked = el.dataset.date;
+          if (!rangeStart || rangeEnd) {
+            rangeStart = clicked; rangeEnd = null;
+          } else if (clicked <= rangeStart) {
+            rangeStart = clicked; rangeEnd = null;
+          } else if (!isRangeClear(rangeStart, clicked)) {
+            alert("Tanlangan oraliqda band kunlar bor.");
+            rangeStart = clicked; rangeEnd = null;
+          } else {
+            rangeEnd = clicked;
+          }
+          updateHiddenDates();
           renderCalendar();
         };
       });
     }
 
-    roomSelect.addEventListener('change', loadBookedDates);
-    loadBookedDates();
+    document.querySelectorAll('.room-pill').forEach(pill => {
+      pill.addEventListener('mouseenter', () => {
+        previewRoomId = pill.dataset.roomId;
+        loadBookedDates(previewRoomId);
+      });
+      pill.addEventListener('mouseleave', () => {
+        previewRoomId = null;
+        loadBookedDates(selectedRoomId);
+      });
+      pill.addEventListener('click', () => {
+        selectedRoomId = pill.dataset.roomId;
+        roomInput.value = selectedRoomId;
+        document.querySelectorAll('.room-pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        rangeStart = null; rangeEnd = null; updateHiddenDates();
+        loadBookedDates(selectedRoomId);
+      });
+    });
+
+    loadBookedDates(selectedRoomId);
   </script>
 {% endblock %}
