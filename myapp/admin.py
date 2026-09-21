@@ -8,7 +8,7 @@ class RoomAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ("room", "date", "notes", "guest_name", "guest_phone", "created_at")
+    list_display = ("room", "check_in", "check_out", "notes", "guest_name", "guest_phone", "created_at")
     list_filter = ("room",)
     search_fields = ("date",)
 
