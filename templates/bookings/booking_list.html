@@ -1,45 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Jadval — {{ selected_date }}</h1>
+  <h1>Bandlovlar</h1>
 
-  <div class="toolbar">
-   <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-  <input type="date" name="date" value="{{ selected_date }}" style="width:170px;">
-  <input type="text" name="q" placeholder="Ism yoki telefon bo'yicha qidirish" value="{{ request.GET.q }}" style="flex:1; min-width:160px;">
-  <button type="submit" class="btn btn-quiet">Qidirish</button>
-</form>
-    <a href="{% url 'booking-list' %}" class="btn btn-quiet">Bugun</a>
-    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi xona band qilish</a>
+  <div class="toolbar" style="align-items:flex-end;">
+    <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
+      <div><label>Sanadan</label><input type="date" name="from" value="{{ date_from }}" style="width:160px;"></div>
+      <div><label>Sanagacha</label><input type="date" name="to" value="{{ date_to }}" style="width:160px;"></div>
+      <div>
+        <label>Xona</label>
+        <select name="room" style="width:140px;">
+          <option value="">Barchasi</option>
+          {% for r in rooms %}
+           <option value="{{ r.pk }}" {% if r.pk == selected_room %}selected{% endif %}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="flex:1; min-width:160px;"><label>Qidiruv</label><input type="text" name="q" placeholder="Ism yoki telefon" value="{{ request.GET.q }}"></div>
+      <button type="submit" class="btn btn-quiet">Filtrlash</button>
+      <a href="{% url 'booking-list' %}" class="btn btn-quiet">Tozalash</a>
+    </form>
+    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi bandlov</a>
   </div>
 
   <div class="table-responsive">
   <table>
-    <tr><th>Xona</th><th>Mehmon</th><th>Telefon</th><th>Umumiy to'lov</th><th>Oldindan to'lov</th><th>Holat</th><th></th></tr>
+    <tr><th>Xona</th><th>Mehmon</th><th>Telefon</th><th>Sana</th><th>Summa</th><th>Holat</th><th></th></tr>
     {% for b in bookings %}
     <tr>
       <td>{{ b.room }}</td>
       <td>{{ b.guest_name }}</td>
       <td>{{ b.guest_phone }}</td>
-      <td>{{ b.total_price }}</td>
-      <td>{{ b.prepaid_amount }}</td>
+      <td>{{ b.check_in }} → {{ b.check_out }}</td>
+      <td>{{ b.net_total }}</td>
       <td>
-        {% if b.paid_in_full %}<span class="badge paid">To'langan</span>
+        {% if b.is_paid_in_full %}<span class="badge paid">To'langan</span>
         {% else %}<span class="badge unpaid">Qarz: {{ b.balance_due }}</span>{% endif %}
       </td>
       <td>
         <a href="{% url 'booking-edit' b.pk %}">Tahrirlash</a>
-        {% if not b.paid_in_full %}
-        <form method="post" action="{% url 'booking-mark-paid' b.pk %}" style="display:inline;">
-          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">To'landi</button>
-        </form>
-        {% endif %}
         <form method="post" action="{% url 'booking-cancel' b.pk %}" style="display:inline;">
           {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">Bekor qilish</button>
         </form>
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="7" style="color:var(--ink-soft);">Bu kun uchun hali xona band qilinmagan.</td></tr>
+    <tr><td colspan="7" style="color:var(--ink-soft);">Hech qanday bandlov topilmadi.</td></tr>
     {% endfor %}
   </table>
   </div>

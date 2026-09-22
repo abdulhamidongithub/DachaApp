@@ -39,7 +39,9 @@ class BookingListView(LoginRequiredMixin, ListView):
         ctx["rooms"] = Room.objects.all()
         ctx["date_from"] = self.request.GET.get("from", "")
         ctx["date_to"] = self.request.GET.get("to", "")
-        ctx["selected_room"] = self.request.GET.get("room", "")
+
+        room_id = self.request.GET.get("room")
+        ctx["selected_room"] = int(room_id) if room_id else None
         return ctx
 
 
