@@ -18,7 +18,7 @@ class Room(models.Model):
         ordering = ["number"]
 
     def __str__(self):
-        return f"Room {self.number}"
+        return f"{self.number}"
 
     def is_available(self, check_in, check_out, exclude_booking_id=None):
         qs = self.bookings.filter(is_cancelled=False).filter(
