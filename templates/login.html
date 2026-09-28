@@ -34,13 +34,18 @@
   <div class="card">
     <h1>Dacha boshqaruv tizimi</h1>
 <p class="tag">Tizimga kirish</p>
-<form method="post">
-  {% csrf_token %}
-  {% if form.errors %}<ul class="errorlist"><li>Login yoki parol noto'g'ri.</li></ul>{% endif %}
-  <label for="id_username">Foydalanuvchi nomi</label>
-  <input type="text" name="username" id="id_username" required>
+<form method="post">{% csrf_token %}
+  {% if form.non_field_errors %}
+    <ul class="errorlist">
+      {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  <label for="id_username">Login</label>
+  <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}">
+  {% if form.username.errors %}<div class="field-error">{{ form.username.errors.0 }}</div>{% endif %}
   <label for="id_password">Parol</label>
-  <input type="password" name="password" id="id_password" required>
+  <input type="password" name="password" id="id_password">
+  {% if form.password.errors %}<div class="field-error">{{ form.password.errors.0 }}</div>{% endif %}
   <button type="submit">Kirish</button>
 </form>
   </div>

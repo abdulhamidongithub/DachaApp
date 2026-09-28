@@ -5,7 +5,14 @@
   <form method="post" id="booking-form" style="max-width: 520px;">
     {% csrf_token %}
     <p>{{ form.guest_name.label_tag }} {{ form.guest_name }}</p>
-    <p>{{ form.guest_phone.label_tag }} {{ form.guest_phone }}</p>
+   <p>
+  <label>Telefon raqami</label>
+  <div class="phone-input">
+    <span class="phone-prefix">+998</span>
+    {{ form.phone_local }}
+  </div>
+  {% if form.phone_local.errors %}<div class="field-error">{{ form.phone_local.errors.0 }}</div>{% endif %}
+</p>
 
     <p>
       <label>Xona</label>
@@ -30,8 +37,11 @@
     {{ form.check_out }}
 
     <p>{{ form.total_price.label_tag }} {{ form.total_price }}</p>
-    <p>{{ form.discount_amount.label_tag }} {{ form.discount_amount }}</p>
-    <p>{{ form.notes.label_tag }} {{ form.notes }}</p>
+<p>{{ form.discount_amount.label_tag }} {{ form.discount_amount }}</p>
+{% if not form.instance.pk %}
+<p>{{ form.prepayment_amount.label_tag }} {{ form.prepayment_amount }}</p>
+{% endif %}
+<p>{{ form.notes.label_tag }} {{ form.notes }}</p>
     <button type="submit" class="btn">Bandlovni saqlash</button>
   </form>
 
@@ -85,6 +95,11 @@
     .cal-day.booked { background: var(--booked); color:#fff; cursor:not-allowed; }
     .cal-day.selected { background: var(--available); color:#fff; }
     .cal-day.in-range { background: #DCEDEA; }
+    .phone-input { display:flex; align-items:center; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:var(--surface); }
+.phone-prefix { padding:0.55rem 0.6rem; background:#EFEAE0; color:var(--ink-soft); font-size:0.95rem; border-right:1px solid var(--border); }
+.phone-input input { border:none; flex:1; padding:0.55rem 0.7rem; font-family:inherit; font-size:0.95rem; }
+.phone-input input:focus { outline:none; }
+.field-error { color: var(--booked); font-size: 0.82rem; margin-top: 0.25rem; }
     @media (max-width: 480px) { .cal-day, .cal-dow { font-size: 0.72rem; padding: 0.3rem 0; } }
   </style>
 
@@ -213,7 +228,12 @@
         loadBookedDates(selectedRoomId);
       });
     });
-
+    const phoneInput = document.getElementById('id_phone_local');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 9);
+      });
+    }
     loadBookedDates(selectedRoomId);
   </script>
 {% endblock %}

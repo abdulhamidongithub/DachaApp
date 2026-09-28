@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
 
-from .forms import BookingForm, PaymentForm, RoomForm
+from .forms import NewBookingForm, BookingForm, PaymentForm, RoomForm
 from .models import Booking, Payment, Room
 
 
@@ -47,7 +47,7 @@ class BookingListView(LoginRequiredMixin, ListView):
 
 class BookingCreateView(LoginRequiredMixin, CreateView):
     model = Booking
-    form_class = BookingForm
+    form_class = NewBookingForm
     template_name = "bookings/booking_form.html"
     success_url = reverse_lazy("booking-list")
 
@@ -58,7 +58,14 @@ class BookingCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        prepayment = form.cleaned_data.get("prepayment_amount")
+        if prepayment:
+            Payment.objects.create(
+                booking=self.object, amount=prepayment,
+                note="Oldindan to'lov", recorded_by=self.request.user,
+            )
+        return response
 
 
 class BookingUpdateView(LoginRequiredMixin, UpdateView):

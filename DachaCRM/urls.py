@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from myapp import views
+from myapp.forms import UzbekAuthenticationForm
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,6 +20,6 @@ urlpatterns = [
     path("rooms/<int:pk>/edit/", views.RoomUpdateView.as_view(), name="room-edit"),
     path("rooms/<int:pk>/booked-dates/", views.RoomBookedDatesView.as_view(), name="room-booked-dates"),
 
-    path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
+    path("login/", auth_views.LoginView.as_view(template_name="login.html",authentication_form=UzbekAuthenticationForm,), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]
