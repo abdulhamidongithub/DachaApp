@@ -4,28 +4,34 @@
 
   <form method="post" id="booking-form" style="max-width: 520px;">
     {% csrf_token %}
-    <p>{{ form.guest_name.label_tag }} {{ form.guest_name }}</p>
-   <p>
-  <label>Telefon raqami</label>
-  <div class="phone-input">
-    <span class="phone-prefix">+998</span>
-    {{ form.phone_local }}
-  </div>
-  {% if form.phone_local.errors %}<div class="field-error">{{ form.phone_local.errors.0 }}</div>{% endif %}
-</p>
 
     <p>
-      <label>Xona</label>
+      <label for="id_guest_name">Mehmon ismi <span class="required-mark">*</span></label>
+      {{ form.guest_name }}
+    </p>
+
+    <p>
+      <label for="id_phone_local">Telefon raqami <span class="required-mark">*</span></label>
+      <div class="phone-input">
+        <span class="phone-prefix">+998</span>
+        {{ form.phone_local }}
+      </div>
+      {% if form.phone_local.errors %}<div class="field-error">{{ form.phone_local.errors.0 }}</div>{% endif %}
+    </p>
+
+    <p>
+      <label>Xona <span class="required-mark">*</span></label>
       <div id="room-pills">
         {% for r in rooms %}
-        <span class="room-pill {% if form.instance.room_id == r.pk %}selected{% endif %}" data-room-id="{{ r.pk }}">{{ r }}</span>
+        <span class="room-pill {% if form.instance.room_id == r.pk %}selected{% endif %}"
+              data-room-id="{{ r.pk }}" data-price="{{ r.price_per_night|default_if_none:0 }}">{{ r }}</span>
         {% endfor %}
       </div>
     </p>
     {{ form.room }}
 
     <p>
-      <label>Sanalar (birinchi kun — kirish, ikkinchi bosgan kun — oxirgi tun)</label>
+      <label>Sanalar <span class="required-mark">*</span> (birinchi kun — kirish, ikkinchi bosgan kun — oxirgi tun)</label>
       <div id="calendar" style="border:1px solid var(--border); border-radius:6px; padding:1rem; background:#fff;"></div>
       <div style="display:flex; gap:1rem; margin-top:0.6rem; font-size:0.82rem; color:var(--ink-soft);">
         <span><span class="legend-dot" style="background:var(--available);"></span> Bo'sh</span>
@@ -36,12 +42,32 @@
     {{ form.check_in }}
     {{ form.check_out }}
 
-    <p>{{ form.total_price.label_tag }} {{ form.total_price }}</p>
-<p>{{ form.discount_amount.label_tag }} {{ form.discount_amount }}</p>
-{% if not form.instance.pk %}
-<p>{{ form.prepayment_amount.label_tag }} {{ form.prepayment_amount }}</p>
-{% endif %}
-<p>{{ form.notes.label_tag }} {{ form.notes }}</p>
+    <p>
+      <label for="id_total_price">Umumiy summa <span class="required-mark">*</span>
+        <button type="button" id="recalc-btn" class="btn-quiet btn" style="padding:0.1rem 0.5rem; font-size:0.75rem; margin-left:0.4rem;">Qayta hisoblash</button>
+      </label>
+      {{ form.total_price }}
+      <span id="price-hint" style="font-size:0.8rem; color:var(--ink-soft); display:block; margin-top:0.25rem;"></span>
+    </p>
+
+    <p>
+      <label for="id_discount_amount">Chegirma <span class="optional-tag">(ixtiyoriy)</span></label>
+      {{ form.discount_amount }}
+    </p>
+    <p id="net-total-preview" style="font-size:0.9rem; color:var(--ink-soft); margin-top:-0.5rem;"></p>
+
+    {% if not form.instance.pk %}
+    <p>
+      <label for="id_prepayment_amount">Oldindan to'lov <span class="optional-tag">(ixtiyoriy)</span></label>
+      {{ form.prepayment_amount }}
+    </p>
+    {% endif %}
+
+    <p>
+      <label for="id_notes">Izoh <span class="optional-tag">(ixtiyoriy)</span></label>
+      {{ form.notes }}
+    </p>
+
     <button type="submit" class="btn">Bandlovni saqlash</button>
   </form>
 
@@ -96,10 +122,10 @@
     .cal-day.selected { background: var(--available); color:#fff; }
     .cal-day.in-range { background: #DCEDEA; }
     .phone-input { display:flex; align-items:center; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:var(--surface); }
-.phone-prefix { padding:0.55rem 0.6rem; background:#EFEAE0; color:var(--ink-soft); font-size:0.95rem; border-right:1px solid var(--border); }
-.phone-input input { border:none; flex:1; padding:0.55rem 0.7rem; font-family:inherit; font-size:0.95rem; }
-.phone-input input:focus { outline:none; }
-.field-error { color: var(--booked); font-size: 0.82rem; margin-top: 0.25rem; }
+    .phone-prefix { padding:0.55rem 0.6rem; background:#EFEAE0; color:var(--ink-soft); font-size:0.95rem; border-right:1px solid var(--border); }
+    .phone-input input { border:none; flex:1; padding:0.55rem 0.7rem; font-family:inherit; font-size:0.95rem; }
+    .phone-input input:focus { outline:none; }
+    .field-error { color: var(--booked); font-size: 0.82rem; margin-top: 0.25rem; }
     @media (max-width: 480px) { .cal-day, .cal-dow { font-size: 0.72rem; padding: 0.3rem 0; } }
   </style>
 
@@ -108,6 +134,10 @@
     const checkInInput = document.getElementById('id_check_in');
     const checkOutInput = document.getElementById('id_check_out');
     const calendarEl = document.getElementById('calendar');
+    const totalInput = document.getElementById('id_total_price');
+    const discountInput = document.getElementById('id_discount_amount');
+    const priceHint = document.getElementById('price-hint');
+    const netPreview = document.getElementById('net-total-preview');
     const excludeId = "{{ form.instance.pk|default:'' }}";
 
     const OY_NOMLARI = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
@@ -117,6 +147,7 @@
     let previewRoomId = null;
     let bookedDates = new Set();
     let viewDate = checkInInput.value ? new Date(checkInInput.value) : new Date();
+    let totalManuallyEdited = excludeId ? true : false; // don't clobber an existing booking's price on load
 
     let rangeStart = checkInInput.value || null;
     let rangeEnd = null;
@@ -127,6 +158,43 @@
     }
 
     function activeRoomId() { return previewRoomId || selectedRoomId; }
+
+    function getSelectedPrice() {
+      const pill = document.querySelector(`.room-pill[data-room-id="${selectedRoomId}"]`);
+      const p = pill ? parseFloat(pill.dataset.price) : 0;
+      return p > 0 ? p : null;
+    }
+
+    function getNights() {
+      if (!checkInInput.value || !checkOutInput.value) return 0;
+      const diff = (new Date(checkOutInput.value) - new Date(checkInInput.value)) / 86400000;
+      return diff > 0 ? diff : 0;
+    }
+
+    function updateNetPreview() {
+      const total = parseFloat(totalInput.value) || 0;
+      const discount = parseFloat(discountInput.value) || 0;
+      netPreview.textContent = discount > 0 ? `Chegirmadan keyin: ${(total - discount).toFixed(2)}` : '';
+    }
+
+    function recomputeTotal() {
+      const price = getSelectedPrice();
+      const nights = getNights();
+      if (price && nights > 0) {
+        priceHint.textContent = `${nights} kecha × ${price} = ${(price * nights).toFixed(2)}`;
+        if (!totalManuallyEdited) totalInput.value = (price * nights).toFixed(2);
+      } else {
+        priceHint.textContent = '';
+      }
+      updateNetPreview();
+    }
+
+    totalInput.addEventListener('input', () => { totalManuallyEdited = true; updateNetPreview(); });
+    discountInput.addEventListener('input', updateNetPreview);
+    document.getElementById('recalc-btn').addEventListener('click', () => {
+      totalManuallyEdited = false;
+      recomputeTotal();
+    });
 
     async function loadBookedDates(roomId) {
       bookedDates = new Set();
@@ -157,6 +225,7 @@
       } else {
         checkOutInput.value = '';
       }
+      recomputeTotal();
     }
 
     function renderCalendar() {
@@ -228,12 +297,8 @@
         loadBookedDates(selectedRoomId);
       });
     });
-    const phoneInput = document.getElementById('id_phone_local');
-    if (phoneInput) {
-      phoneInput.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g, '').slice(0, 9);
-      });
-    }
+
     loadBookedDates(selectedRoomId);
+    recomputeTotal();
   </script>
 {% endblock %}
