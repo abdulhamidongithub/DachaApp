@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Xarajatlar</h1>
+
+  <div class="toolbar" style="align-items:flex-end;">
+    <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
+      <div><label>Sanadan</label><input type="date" name="from" value="{{ filters.from }}" style="width:160px;"></div>
+      <div><label>Sanagacha</label><input type="date" name="to" value="{{ filters.to }}" style="width:160px;"></div>
+      <div>
+        <label>Turi</label>
+        <select name="type" style="width:170px;">
+          <option value="">Barchasi</option>
+          {% for value, label in types %}
+          <option value="{{ value }}" {% if value == filters.type %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="flex:1; min-width:160px;"><label>Izoh bo'yicha qidirish</label><input type="text" name="q" value="{{ filters.q }}"></div>
+      <button type="submit" class="btn btn-quiet">Qidirish</button>
+      <a href="{% url 'expense-list' %}" class="btn btn-quiet">Bu oy</a>
+    </form>
+    <a href="{% url 'expense-add' %}" class="btn" style="margin-left:auto;">Yangi xarajat</a>
+  </div>
+
+  <p style="color:var(--ink-soft);">Jami: <strong style="color:var(--ink);">{{ total|floatformat:"0g" }}</strong></p>
+
+  <div class="table-responsive">
+  <table>
+    <tr><th>Sana</th><th>Turi</th><th>Summa</th><th>Izoh</th><th>Kiritdi</th><th></th></tr>
+    {% for e in expenses %}
+    <tr>
+      <td>{{ e.date|date:"d.m.Y" }}</td>
+      <td>{{ e.get_type_display }}</td>
+      <td>{{ e.amount|floatformat:"0g" }}</td>
+      <td>{{ e.note }}</td>
+      <td>{{ e.user.username|default:"—" }}</td>
+      <td>
+        <a href="{% url 'expense-edit' e.pk %}">Tahrirlash</a>
+        <form method="post" action="{% url 'expense-delete' e.pk %}" style="display:inline;"
+              onsubmit="return confirm('Bu xarajatni o\'chirasizmi?');">
+          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">O'chirish</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="color:var(--ink-soft);">Xarajat topilmadi.</td></tr>
+    {% endfor %}
+  </table>
+  </div>
+{% endblock %}

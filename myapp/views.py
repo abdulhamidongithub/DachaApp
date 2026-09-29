@@ -1,16 +1,22 @@
-from datetime import timedelta
-
+import calendar
+from datetime import date, datetime, timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.db.models import Q, F, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
+from django.utils.dateparse import parse_date
 
-from .forms import NewBookingForm, BookingForm, PaymentForm, RoomForm
-from .models import Booking, Payment, Room
+from .forms import NewBookingForm, BookingForm, PaymentForm, RoomForm, ExpenseForm
+from .models import Booking, Payment, Room, Expense
 
+def _parse(value):
+    try:
+        return parse_date(value) if value else None
+    except ValueError:
+        return None
 
 class BookingListView(LoginRequiredMixin, ListView):
     model = Booking
@@ -146,3 +152,65 @@ class RoomUpdateView(LoginRequiredMixin, UpdateView):
     form_class = RoomForm
     template_name = "rooms/room_form.html"
     success_url = reverse_lazy("room-list")
+
+class ExpenseListView(LoginRequiredMixin, ListView):
+    model = Expense
+    template_name = "expenses/expense_list.html"
+    context_object_name = "expenses"
+
+    def _filters(self):
+        g = self.request.GET
+        if not g:  # first visit: show the current month
+            today = timezone.localdate()
+            last_day = calendar.monthrange(today.year, today.month)[1]
+            return {
+                "from": today.replace(day=1).isoformat(),
+                "to": today.replace(day=last_day).isoformat(),
+                "type": "", "q": "",
+            }
+        return {k: g.get(k, "") for k in ("from", "to", "type", "q")}
+
+    def get_queryset(self):
+        f = self._filters()
+        qs = Expense.objects.select_related("user")
+        d_from, d_to = _parse(f["from"]), _parse(f["to"])
+        if d_from:
+            qs = qs.filter(date__gte=d_from)
+        if d_to:
+            qs = qs.filter(date__lte=d_to)
+        if f["type"]:
+            qs = qs.filter(type=f["type"])
+        if f["q"]:
+            qs = qs.filter(note__icontains=f["q"])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["filters"] = self._filters()
+        ctx["types"] = Expense.TYPE_CHOICES
+        ctx["total"] = self.object_list.aggregate(t=Sum("amount"))["t"] or 0
+        return ctx
+
+
+class ExpenseCreateView(LoginRequiredMixin, CreateView):
+    model = Expense
+    form_class = ExpenseForm
+    template_name = "expenses/expense_form.html"
+    success_url = reverse_lazy("expense-list")
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
+    model = Expense
+    form_class = ExpenseForm
+    template_name = "expenses/expense_form.html"
+    success_url = reverse_lazy("expense-list")
+
+
+class ExpenseDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        get_object_or_404(Expense, pk=pk).delete()
+        return redirect("expense-list")
