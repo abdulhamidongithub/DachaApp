@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
-from .models import Room, Booking, Payment
+from .models import Room, Booking, Payment, Expense
 
 PHONE_LOCAL_RE = re.compile(r'^\d{9}$')
 
@@ -112,3 +112,13 @@ class UzbekAuthenticationForm(AuthenticationForm):
         self.fields['username'].error_messages = {"required": "Login kiritilishi kerak."}
         self.fields['password'].label = "Parol"
         self.fields['password'].error_messages = {"required": "Parol kiritilishi kerak."}
+
+class ExpenseForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = ["date", "type", "amount", "note"]
+        labels = {"date": "Sana", "type": "Turi", "amount": "Summa", "note": "Izoh"}
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "note": forms.TextInput(attrs={"placeholder": "Masalan: bozordan sabzavot"}),
+        }
