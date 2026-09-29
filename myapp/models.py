@@ -1,5 +1,7 @@
 from datetime import timedelta
-
+from decimal import Decimal
+from django.core.validators import MinValueValidator
+from django.utils import timezone
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -117,3 +119,28 @@ class Payment(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+class Expense(models.Model):
+    TYPE_CHOICES = [
+        ("food", "Oziq-ovqat"),
+        ("salary", "Ish haqi"),
+        ("utilities", "Kommunal xizmatlar"),
+        ("maintenance", "Ta'mirlash"),
+        ("supplies", "Xo'jalik buyumlari"),
+        ("other", "Boshqa"),
+    ]
+
+    date = models.DateField(default=timezone.localdate)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="other")
+    note = models.CharField(max_length=255, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="expenses"
+    )
+
+    class Meta:
+        ordering = ["-date", "-id"]
+
+    def __str__(self):
+        return f"{self.date} | {self.get_type_display()} | {self.amount}"
+

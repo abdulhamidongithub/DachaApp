@@ -40,10 +40,10 @@
       {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
     </ul>
   {% endif %}
-  <label for="id_username">Login</label>
+  <label for="id_username">Login <span style="color:#B9483A;">*</span></label>
   <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}">
   {% if form.username.errors %}<div class="field-error">{{ form.username.errors.0 }}</div>{% endif %}
-  <label for="id_password">Parol</label>
+ <label for="id_password">Parol <span style="color:#B9483A;">*</span></label>
   <input type="password" name="password" id="id_password">
   {% if form.password.errors %}<div class="field-error">{{ form.password.errors.0 }}</div>{% endif %}
   <button type="submit">Kirish</button>
