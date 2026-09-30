@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Hisobot</h1>
+
+  <div class="toolbar" style="align-items:flex-end;">
+    <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
+      <div><label>Sanadan</label><input type="date" name="from" value="{{ date_from|date:'Y-m-d' }}" style="width:160px;"></div>
+      <div><label>Sanagacha</label><input type="date" name="to" value="{{ date_to|date:'Y-m-d' }}" style="width:160px;"></div>
+      <button type="submit" class="btn btn-quiet">Ko'rsatish</button>
+    </form>
+    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+      {% for p in presets %}
+      <a class="btn btn-quiet" style="padding:0.4rem 0.7rem; font-size:0.82rem;"
+         href="?from={{ p.start|date:'Y-m-d' }}&to={{ p.end|date:'Y-m-d' }}">{{ p.label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num">{{ bookings_count }}</div><div class="lbl">Bandlovlar soni</div></div>
+    <div class="stat"><div class="num">{{ earnings|floatformat:"0g" }}</div><div class="lbl">Tushum</div></div>
+    <div class="stat"><div class="num">{{ spent|floatformat:"0g" }}</div><div class="lbl">Xarajat</div></div>
+    <div class="stat">
+      <div class="num" {% if net < 0 %}style="color:var(--booked);"{% endif %}>{{ net|floatformat:"0g" }}</div>
+      <div class="lbl">Sof foyda</div>
+    </div>
+  </div>
+  <p style="font-size:0.8rem; color:var(--ink-soft);">
+    Bandlovlar — kirish sanasi shu davrga to'g'ri kelganlari. Tushum — shu davrda qabul qilingan to'lovlar.
+  </p>
+
+  <h3 style="margin-top:2rem;">{% if chart_data.monthly %}Oylik{% else %}Kunlik{% endif %} dinamika</h3>
+  <div style="position:relative; height:320px; background:var(--surface); border-radius:var(--radius); padding:1rem;">
+    <canvas id="trend"></canvas>
+  </div>
+
+  {{ chart_data|json_script:"chart-data" }}
+
+  <style>
+    .stats { display:grid; grid-template-columns: repeat(4, 1fr); background:var(--surface); border-radius:var(--radius); margin-top:1rem; }
+    .stat { padding:1.1rem 1.25rem; border-right:1px solid var(--border); }
+    .stat:last-child { border-right:none; }
+    .stat .num { font-family:'Fraunces',serif; font-size:1.6rem; }
+    .stat .lbl { color:var(--ink-soft); font-size:0.82rem; }
+    @media (max-width: 768px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stat { border-bottom:1px solid var(--border); }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const d = JSON.parse(document.getElementById('chart-data').textContent);
+    const dense = d.labels.length > 40;
+    new Chart(document.getElementById('trend'), {
+      type: 'line',
+      data: {
+        labels: d.labels,
+        datasets: [
+          { label: 'Tushum', data: d.earnings, borderColor: '#3E7C7C', backgroundColor: 'rgba(62,124,124,0.12)',
+            fill: true, tension: 0.25, pointRadius: dense ? 0 : 3 },
+          { label: 'Xarajat', data: d.expenses, borderColor: '#B9483A', backgroundColor: 'rgba(185,72,58,0.10)',
+            fill: true, tension: 0.25, pointRadius: dense ? 0 : 3 },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  </script>
+{% endblock %}

@@ -123,10 +123,14 @@
 <body>
   <aside class="sidebar">
   <p class="brand">Dacha CRM</p>
-  <nav>
-  <a href="{% url 'booking-list' %}" class="{% if '/rooms/' not in request.path %}active{% endif %}">Jadval</a>
-  <a href="{% url 'room-list' %}" class="{% if '/rooms/' in request.path %}active{% endif %}">Xonalar</a>
+ {% with p=request.path %}
+<nav>
+  <a href="{% url 'booking-list' %}" class="{% if '/rooms/' not in p and '/expenses/' not in p and '/report/' not in p %}active{% endif %}">Bandlovlar</a>
+  <a href="{% url 'room-list' %}" class="{% if '/rooms/' in p %}active{% endif %}">Xonalar</a>
+  <a href="{% url 'expense-list' %}" class="{% if '/expenses/' in p %}active{% endif %}">Xarajatlar</a>
+  <a href="{% url 'report' %}" class="{% if '/report/' in p %}active{% endif %}">Hisobot</a>
 </nav>
+{% endwith %}
   {% if user.is_authenticated %}
   <form method="post" action="{% url 'logout' %}">
     {% csrf_token %}
