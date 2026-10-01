@@ -85,13 +85,16 @@
     <tr><td colspan="2"><strong>Qoldiq</strong></td><td><strong>{{ form.instance.balance_due }}</strong></td></tr>
   </table>
 
-  <form method="post" action="{% url 'booking-add-payment' form.instance.pk %}" style="display:flex; gap:0.5rem; align-items:flex-end; margin-top:0.75rem;">
-    {% csrf_token %}
-    <div>{{ payment_form.amount.label_tag }} {{ payment_form.amount }}</div>
-    <div style="flex:1;">{{ payment_form.note.label_tag }} {{ payment_form.note }}</div>
-    <button type="submit" class="btn btn-quiet">To'lov qo'shish</button>
-  </form>
-
+<form method="post" action="{% url 'booking-add-charge' form.instance.pk %}"
+      style="display:flex; gap:0.5rem; align-items:flex-end; margin-top:0.6rem; flex-wrap:wrap;">
+  {% csrf_token %}
+  <div><label>Qo'shimcha xizmat narxi</label><input type="number" name="charge_amount" min="1" step="1" required></div>
+  <div style="flex:1; min-width:140px;"><label>Izoh</label><input type="text" name="charge_note" placeholder="Masalan: kechki ovqat"></div>
+  <label style="display:flex; align-items:center; gap:0.3rem; font-size:0.85rem; color:var(--ink-soft); white-space:nowrap;">
+    <input type="checkbox" name="paid_now" checked style="width:auto;"> Hozir to'landi
+  </label>
+  <button type="submit" class="btn btn-success">Qo'shish</button>
+</form>
   {% if form.instance.balance_due > 0 %}
   <form method="post" action="{% url 'booking-settle' form.instance.pk %}" style="margin-top:0.5rem;">
     {% csrf_token %}

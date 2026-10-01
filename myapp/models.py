@@ -6,7 +6,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db.models import Q
-
+from django.core.validators import MinValueValidator
 
 class Room(models.Model):
     number = models.CharField(
@@ -14,7 +14,7 @@ class Room(models.Model):
         unique=True,
         help_text="Xona raqami yoki nomi, masalan: '101'",
     )
-    price_per_night = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price_per_night = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(1)])
 
     class Meta:
         ordering = ["number"]
@@ -39,8 +39,8 @@ class Booking(models.Model):
     check_in = models.DateField(help_text="Kirish sanasi")
     check_out = models.DateField(help_text="Chiqish sanasi (shu kunning tuni band qilinmaydi)")
 
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_price = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    discount_amount = models.PositiveIntegerField(default=0)
 
     is_cancelled = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
@@ -96,7 +96,7 @@ class Payment(models.Model):
     """One payment received against a booking — prepayment, an extra payment, or final settlement."""
 
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="payments")
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     note = models.CharField(
         max_length=100, blank=True,
         help_text="Masalan: 'Oldindan to'lov', 'Qo'shimcha xizmat', 'Yakuniy to'lov'",
@@ -131,7 +131,7 @@ class Expense(models.Model):
     ]
 
     date = models.DateField(default=timezone.localdate)
-    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
+    amount = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="other")
     note = models.CharField(max_length=255, blank=True)
     user = models.ForeignKey(
