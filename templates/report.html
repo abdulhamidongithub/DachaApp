@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>Hisobot</h1>
-
+{% load humanize %}
   <div class="toolbar" style="align-items:flex-end;">
     <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
       <div><label>Sanadan</label><input type="date" name="from" value="{{ date_from|date:'Y-m-d' }}" style="width:160px;"></div>
@@ -17,16 +17,16 @@
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="num">{{ bookings_count }}</div><div class="lbl">Bandlovlar soni</div></div>
-    <div class="stat"><div class="num">{{ earnings|floatformat:"0g" }}</div><div class="lbl">Tushum</div></div>
-    <div class="stat"><div class="num">{{ spent|floatformat:"0g" }}</div><div class="lbl">Xarajat</div></div>
+    <div class="stat"><div class="num">{{ bookings_count }}</div><div class="lbl">Buyurtmalar soni</div></div>
+    <div class="stat"><div class="num">{{ earnings|intcomma }}</div><div class="lbl">Tushum</div></div>
+    <div class="stat"><div class="num">{{ spent|intcomma }}</div><div class="lbl">Xarajat</div></div>
     <div class="stat">
-      <div class="num" {% if net < 0 %}style="color:var(--booked);"{% endif %}>{{ net|floatformat:"0g" }}</div>
+      <div class="num" {% if net < 0 %}style="color:var(--booked);"{% endif %}>{{ net|intcomma }}</div>
       <div class="lbl">Sof foyda</div>
     </div>
   </div>
   <p style="font-size:0.8rem; color:var(--ink-soft);">
-    Bandlovlar — kirish sanasi shu davrga to'g'ri kelganlari. Tushum — shu davrda qabul qilingan to'lovlar.
+    Buyurtmalar — kirish sanasi shu davrga to'g'ri kelganlari. Tushum — shu davrda qabul qilingan to'lovlar.
   </p>
 
   <h3 style="margin-top:2rem;">{% if chart_data.monthly %}Oylik{% else %}Kunlik{% endif %} dinamika</h3>

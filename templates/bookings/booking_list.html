@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Bandlovlar</h1>
-
+  <h1>Buyurtmalar</h1>
+{% load humanize %}
   <div class="toolbar" style="align-items:flex-end;">
     <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
       <div><label>Sanadan</label><input type="date" name="from" value="{{ date_from }}" style="width:160px;"></div>
@@ -19,7 +19,7 @@
       <button type="submit" class="btn btn-quiet">Filtrlash</button>
       <a href="{% url 'booking-list' %}" class="btn btn-quiet">Tozalash</a>
     </form>
-    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi bandlov</a>
+    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi buyurtma</a>
   </div>
 
   <div class="table-responsive">
@@ -31,10 +31,10 @@
       <td>{{ b.guest_name }}</td>
       <td>{{ b.guest_phone }}</td>
       <td>{{ b.check_in }} → {{ b.check_out }}</td>
-      <td>{{ b.net_total }}</td>
+      <td>{{ b.net_total|intcomma }}</td>
       <td>
         {% if b.is_paid_in_full %}<span class="badge paid">To'langan</span>
-        {% else %}<span class="badge unpaid">Qarz: {{ b.balance_due }}</span>{% endif %}
+        {% else %}<span class="badge unpaid">Qarz: {{ b.balance_due|intcomma }}</span>{% endif %}
       </td>
       <td>
         <a href="{% url 'booking-edit' b.pk %}">Tahrirlash</a>
@@ -44,7 +44,7 @@
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="7" style="color:var(--ink-soft);">Hech qanday bandlov topilmadi.</td></tr>
+    <tr><td colspan="7" style="color:var(--ink-soft);">Hech qanday buyurtma topilmadi.</td></tr>
     {% endfor %}
   </table>
   </div>

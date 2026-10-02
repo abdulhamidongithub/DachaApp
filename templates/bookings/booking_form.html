@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>{% if form.instance.pk %}Bandlovni tahrirlash{% else %}Yangi bandlov{% endif %}</h1>
-
+  <h1>{% if form.instance.pk %}Buyurtmani tahrirlash{% else %}Yangi buyurtma{% endif %}</h1>
+{% load humanize %}
   <form method="post" id="booking-form" style="max-width: 520px;">
     {% csrf_token %}
 
@@ -24,7 +24,7 @@
       <div id="room-pills">
         {% for r in rooms %}
         <span class="room-pill {% if form.instance.room_id == r.pk %}selected{% endif %}"
-              data-room-id="{{ r.pk }}" data-price="{{ r.price_per_night|default_if_none:0 }}">{{ r }}</span>
+              data-room-id="{{ r.pk }}" data-price="{{ r.price_per_night|intcomma|default_if_none:0 }}">{{ r }}</span>
         {% endfor %}
       </div>
     </p>
@@ -46,20 +46,20 @@
       <label for="id_total_price">Umumiy summa <span class="required-mark">*</span>
         <button type="button" id="recalc-btn" class="btn-quiet btn" style="padding:0.1rem 0.5rem; font-size:0.75rem; margin-left:0.4rem;">Qayta hisoblash</button>
       </label>
-      {{ form.total_price }}
+      {{ form.total_price|intcomma }}
       <span id="price-hint" style="font-size:0.8rem; color:var(--ink-soft); display:block; margin-top:0.25rem;"></span>
     </p>
 
     <p>
       <label for="id_discount_amount">Chegirma <span class="optional-tag">(ixtiyoriy)</span></label>
-      {{ form.discount_amount }}
+      {{ form.discount_amount|intcomma }}
     </p>
     <p id="net-total-preview" style="font-size:0.9rem; color:var(--ink-soft); margin-top:-0.5rem;"></p>
 
     {% if not form.instance.pk %}
     <p>
       <label for="id_prepayment_amount">Oldindan to'lov <span class="optional-tag">(ixtiyoriy)</span></label>
-      {{ form.prepayment_amount }}
+      {{ form.prepayment_amount|intcomma }}
     </p>
     {% endif %}
 
@@ -68,7 +68,7 @@
       {{ form.notes }}
     </p>
 
-    <button type="submit" class="btn">Bandlovni saqlash</button>
+    <button type="submit" class="btn">Saqlash</button>
   </form>
 
   {% if form.instance.pk %}
@@ -77,12 +77,12 @@
   <table>
     <tr><th>Sana</th><th>Summa</th><th>Izoh</th></tr>
     {% for p in payments %}
-    <tr><td>{{ p.paid_at|date:"d.m.Y H:i" }}</td><td>{{ p.amount }}</td><td>{{ p.note }}</td></tr>
+    <tr><td>{{ p.paid_at|date:"d.m.Y H:i" }}</td><td>{{ p.amount|intcomma }}</td><td>{{ p.note }}</td></tr>
     {% empty %}
     <tr><td colspan="3" style="color:var(--ink-soft);">Hali to'lov yo'q.</td></tr>
     {% endfor %}
-    <tr><td colspan="2"><strong>Jami to'langan</strong></td><td><strong>{{ form.instance.amount_paid }}</strong></td></tr>
-    <tr><td colspan="2"><strong>Qoldiq</strong></td><td><strong>{{ form.instance.balance_due }}</strong></td></tr>
+    <tr><td colspan="2"><strong>Jami to'langan</strong></td><td><strong>{{ form.instance.amount_paid|intcomma }}</strong></td></tr>
+    <tr><td colspan="2"><strong>Qoldiq</strong></td><td><strong>{{ form.instance.balance_due|intcomma }}</strong></td></tr>
   </table>
 
 <form method="post" action="{% url 'booking-add-charge' form.instance.pk %}"
@@ -98,7 +98,7 @@
   {% if form.instance.balance_due > 0 %}
   <form method="post" action="{% url 'booking-settle' form.instance.pk %}" style="margin-top:0.5rem;">
     {% csrf_token %}
-    <button type="submit" class="btn">Qoldiqni to'liq to'lash ({{ form.instance.balance_due }})</button>
+    <button type="submit" class="btn">Qoldiqni to'liq to'lash ({{ form.instance.balance_due|intcomma }})</button>
   </form>
   {% endif %}
   {% endif %}
@@ -164,7 +164,7 @@
 
     function getSelectedPrice() {
       const pill = document.querySelector(`.room-pill[data-room-id="${selectedRoomId}"]`);
-      const p = pill ? parseFloat(pill.dataset.price) : 0;
+      const p = pill ? parseInt(pill.dataset.price, 10) : 0;
       return p > 0 ? p : null;
     }
 
@@ -175,22 +175,22 @@
     }
 
     function updateNetPreview() {
-      const total = parseFloat(totalInput.value) || 0;
-      const discount = parseFloat(discountInput.value) || 0;
-      netPreview.textContent = discount > 0 ? `Chegirmadan keyin: ${(total - discount).toFixed(2)}` : '';
-    }
+      const total = parseInt(totalInput.value, 10) || 0;
+      const discount = parseInt(discountInput.value, 10) || 0;
+      netPreview.textContent = discount > 0 ? `Chegirmadan keyin: ${(total - discount).toLocaleString('de-DE')}` : '';
+}
 
     function recomputeTotal() {
       const price = getSelectedPrice();
       const nights = getNights();
       if (price && nights > 0) {
-        priceHint.textContent = `${nights} kecha × ${price} = ${(price * nights).toFixed(2)}`;
-        if (!totalManuallyEdited) totalInput.value = (price * nights).toFixed(2);
+        priceHint.textContent = `${nights} kecha × ${price.toLocaleString('de-DE')} = ${(price * nights).toLocaleString('de-DE')}`;
+        if (!totalManuallyEdited) totalInput.value = price * nights;
       } else {
         priceHint.textContent = '';
       }
       updateNetPreview();
-    }
+}
 
     totalInput.addEventListener('input', () => { totalManuallyEdited = true; updateNetPreview(); });
     discountInput.addEventListener('input', updateNetPreview);

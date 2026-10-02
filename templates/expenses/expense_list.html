@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>Xarajatlar</h1>
-
+{% load humanize %}
   <div class="toolbar" style="align-items:flex-end;">
     <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
       <div><label>Sanadan</label><input type="date" name="from" value="{{ filters.from }}" style="width:160px;"></div>
@@ -22,7 +22,7 @@
     <a href="{% url 'expense-add' %}" class="btn" style="margin-left:auto;">Yangi xarajat</a>
   </div>
 
-  <p style="color:var(--ink-soft);">Jami: <strong style="color:var(--ink);">{{ total|floatformat:"0g" }}</strong></p>
+  <p style="color:var(--ink-soft);">Jami: <strong style="color:var(--ink);">{{ total|intcomma }}</strong></p>
 
   <div class="table-responsive">
   <table>
@@ -31,7 +31,7 @@
     <tr>
       <td>{{ e.date|date:"d.m.Y" }}</td>
       <td>{{ e.get_type_display }}</td>
-      <td>{{ e.amount|floatformat:"0g" }}</td>
+      <td>{{ e.amount|intcomma }}</td>
       <td>{{ e.note }}</td>
       <td>{{ e.user.username|default:"—" }}</td>
       <td>
