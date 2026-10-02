@@ -136,8 +136,24 @@
   background: var(--surface);
 }
     th, td { text-align: left; padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; white-space: nowrap; }
+  .confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem;
+}
+.confirm-box { background: #fff; padding: 1.5rem; border-radius: 8px; max-width: 360px; width: 100%; }
+.confirm-box p { margin: 0 0 1.2rem; font-size: 0.95rem; }
+.confirm-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
   </style>
 </head>
+<div id="confirm-modal" class="confirm-overlay" style="display:none;">
+  <div class="confirm-box">
+    <p id="confirm-message"></p>
+    <div class="confirm-actions">
+      <button type="button" id="confirm-cancel" class="btn btn-quiet">Yo'q, orqaga qaytish</button>
+      <button type="button" id="confirm-ok" class="btn btn-danger">Ha, davom etish</button>
+    </div>
+  </div>
+</div>
 <body>
   <aside class="sidebar">
   <p class="brand">Dacha CRM</p>
@@ -160,4 +176,34 @@
     {% block content %}{% endblock %}
   </main>
 </body>
+<script>
+  function setupConfirmForms() {
+    const overlay = document.getElementById('confirm-modal');
+    const msgEl = document.getElementById('confirm-message');
+    const okBtn = document.getElementById('confirm-ok');
+    const cancelBtn = document.getElementById('confirm-cancel');
+    let pendingForm = null;
+
+    document.querySelectorAll('form[data-confirm]').forEach(form => {
+      if (form.dataset.wired) return;
+      form.dataset.wired = '1';
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        pendingForm = form;
+        msgEl.textContent = form.dataset.confirm;
+        overlay.style.display = 'flex';
+      });
+    });
+
+    okBtn.onclick = () => {
+      overlay.style.display = 'none';
+      if (pendingForm) pendingForm.submit();
+    };
+    cancelBtn.onclick = () => {
+      overlay.style.display = 'none';
+      pendingForm = null;
+    };
+  }
+  document.addEventListener('DOMContentLoaded', setupConfirmForms);
+</script>
 </html>

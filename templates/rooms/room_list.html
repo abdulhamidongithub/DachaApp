@@ -13,7 +13,15 @@
     <tr>
       <td>{{ r.number }}</td>
       <td>{{ r.price_per_night|intcomma }}</td>
-      <td><a href="{% url 'room-edit' r.pk %}" class="btn btn-edit">Tahrirlash</a></td>
+      <td>
+  <div class="row-actions">
+    <a href="{% url 'room-edit' r.pk %}" class="btn btn-edit">Tahrirlash</a>
+   <form method="post" action="{% url 'room-delete' r.pk %}"
+      data-confirm="{{ r }} xonasini o'chirasizmi? Bu amalni ortga qaytarib bo'lmaydi.">
+  {% csrf_token %}<button type="submit" class="btn btn-danger">O'chirish</button>
+</form>
+  </div>
+</td>
     </tr>
     {% endfor %}
   </table>

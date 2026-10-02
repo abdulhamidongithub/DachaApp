@@ -37,7 +37,8 @@
       <td>
         <div class="row-actions">
           <a href="{% url 'expense-edit' e.pk %}" class="btn btn-edit">Tahrirlash</a>
-          <form method="post" action="{% url 'expense-delete' e.pk %}" onsubmit="return confirm('Bu xarajatni o\'chirasizmi?');">
+          <form method="post" action="{% url 'expense-delete' e.pk %}"
+                data-confirm="Bu xarajatni o'chirasizmi?">
             {% csrf_token %}<button type="submit" class="btn btn-danger">O'chirish</button>
           </form>
         </div>

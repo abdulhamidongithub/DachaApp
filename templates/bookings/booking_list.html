@@ -39,9 +39,10 @@
       <td>
         <div class="row-actions">
           <a href="{% url 'booking-edit' b.pk %}" class="btn btn-edit">Tahrirlash</a>
-          <form method="post" action="{% url 'booking-cancel' b.pk %}">
-            {% csrf_token %}<button type="submit" class="btn btn-danger">Bekor qilish</button>
-          </form>
+         <form method="post" action="{% url 'booking-cancel' b.pk %}"
+      data-confirm="{{ b.guest_name }} uchun bandlovni bekor qilasizmi?">
+  {% csrf_token %}<button type="submit" class="btn btn-danger">Bekor qilish</button>
+</form>
         </div>
       </td>
     </tr>

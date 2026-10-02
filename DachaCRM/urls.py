@@ -20,6 +20,7 @@ urlpatterns = [
     path("rooms/add/", views.RoomCreateView.as_view(), name="room-add"),
     path("rooms/<int:pk>/edit/", views.RoomUpdateView.as_view(), name="room-edit"),
     path("rooms/<int:pk>/booked-dates/", views.RoomBookedDatesView.as_view(), name="room-booked-dates"),
+    path("rooms/<int:pk>/delete/", views.RoomDeleteView.as_view(), name="room-delete"),
 
     path("expenses/", views.ExpenseListView.as_view(), name="expense-list"),
     path("expenses/add/", views.ExpenseCreateView.as_view(), name="expense-add"),
