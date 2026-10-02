@@ -19,7 +19,7 @@
       <button type="submit" class="btn btn-quiet">Qidirish</button>
       <a href="{% url 'expense-list' %}" class="btn btn-quiet">Bu oy</a>
     </form>
-    <a href="{% url 'expense-add' %}" class="btn" style="margin-left:auto;">Yangi xarajat</a>
+   <a href="{% url 'expense-add' %}" class="btn btn-primary" style="margin-left:auto;">Yangi xarajat</a>
   </div>
 
   <p style="color:var(--ink-soft);">Jami: <strong style="color:var(--ink);">{{ total|intcomma }}</strong></p>
@@ -32,14 +32,15 @@
       <td>{{ e.date|date:"d.m.Y" }}</td>
       <td>{{ e.get_type_display }}</td>
       <td>{{ e.amount|intcomma }}</td>
-      <td>{{ e.note }}</td>
+      <td style="white-space: normal;">{{ e.note }}</td>
       <td>{{ e.user.username|default:"—" }}</td>
       <td>
-        <a href="{% url 'expense-edit' e.pk %}">Tahrirlash</a>
-        <form method="post" action="{% url 'expense-delete' e.pk %}" style="display:inline;"
-              onsubmit="return confirm('Bu xarajatni o\'chirasizmi?');">
-          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">O'chirish</button>
-        </form>
+        <div class="row-actions">
+          <a href="{% url 'expense-edit' e.pk %}" class="btn btn-edit">Tahrirlash</a>
+          <form method="post" action="{% url 'expense-delete' e.pk %}" onsubmit="return confirm('Bu xarajatni o\'chirasizmi?');">
+            {% csrf_token %}<button type="submit" class="btn btn-danger">O'chirish</button>
+          </form>
+        </div>
       </td>
     </tr>
     {% empty %}

@@ -324,3 +324,8 @@ class BookingAddChargeView(LoginRequiredMixin, View):
                 )
         return redirect("booking-edit", pk=booking.pk)
 
+class RoomDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        get_object_or_404(Room, pk=pk).delete()
+        return redirect("room-list")
+

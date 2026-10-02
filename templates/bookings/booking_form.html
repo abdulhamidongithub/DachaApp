@@ -24,7 +24,7 @@
       <div id="room-pills">
         {% for r in rooms %}
         <span class="room-pill {% if form.instance.room_id == r.pk %}selected{% endif %}"
-              data-room-id="{{ r.pk }}" data-price="{{ r.price_per_night|intcomma|default_if_none:0 }}">{{ r }}</span>
+              data-room-id="{{ r.pk }}" data-price="{{ r.price_per_night|default_if_none:0 }}">{{ r }}</span>
         {% endfor %}
       </div>
     </p>
@@ -46,20 +46,20 @@
       <label for="id_total_price">Umumiy summa <span class="required-mark">*</span>
         <button type="button" id="recalc-btn" class="btn-quiet btn" style="padding:0.1rem 0.5rem; font-size:0.75rem; margin-left:0.4rem;">Qayta hisoblash</button>
       </label>
-      {{ form.total_price|intcomma }}
+      {{ form.total_price }}
       <span id="price-hint" style="font-size:0.8rem; color:var(--ink-soft); display:block; margin-top:0.25rem;"></span>
     </p>
 
     <p>
       <label for="id_discount_amount">Chegirma <span class="optional-tag">(ixtiyoriy)</span></label>
-      {{ form.discount_amount|intcomma }}
+      {{ form.discount_amount }}
     </p>
     <p id="net-total-preview" style="font-size:0.9rem; color:var(--ink-soft); margin-top:-0.5rem;"></p>
 
     {% if not form.instance.pk %}
     <p>
       <label for="id_prepayment_amount">Oldindan to'lov <span class="optional-tag">(ixtiyoriy)</span></label>
-      {{ form.prepayment_amount|intcomma }}
+      {{ form.prepayment_amount }}
     </p>
     {% endif %}
 
@@ -68,7 +68,7 @@
       {{ form.notes }}
     </p>
 
-    <button type="submit" class="btn">Saqlash</button>
+    <button type="submit" class="btn btn-primary">Saqlash</button>
   </form>
 
   {% if form.instance.pk %}
@@ -98,7 +98,7 @@
   {% if form.instance.balance_due > 0 %}
   <form method="post" action="{% url 'booking-settle' form.instance.pk %}" style="margin-top:0.5rem;">
     {% csrf_token %}
-    <button type="submit" class="btn">Qoldiqni to'liq to'lash ({{ form.instance.balance_due|intcomma }})</button>
+    <button type="submit" class="btn btn-success">Qoldiqni to'liq to'lash ({{ form.instance.balance_due|intcomma }})</button>
   </form>
   {% endif %}
   {% endif %}

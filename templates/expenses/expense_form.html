@@ -6,9 +6,9 @@
     {% csrf_token %}
     <p><label for="id_date">Sana <span class="required-mark">*</span></label>{{ form.date }}{{ form.date.errors }}</p>
     <p><label for="id_type">Turi <span class="required-mark">*</span></label>{{ form.type }}{{ form.type.errors }}</p>
-    <p><label for="id_amount">Summa <span class="required-mark">*</span></label>{{ form.amount|intcomma }}{{ form.amount.errors }}</p>
+    <p><label for="id_amount">Summa <span class="required-mark">*</span></label>{{ form.amount }}{{ form.amount.errors }}</p>
     <p><label for="id_note">Izoh <span class="optional-tag">(ixtiyoriy)</span></label>{{ form.note }}</p>
-    <button type="submit" class="btn">Saqlash</button>
-    <a href="{% url 'expense-list' %}" class="btn btn-quiet">Bekor qilish</a>
+    <button type="submit" class="btn btn-primary">Saqlash</button>
+<a href="{% url 'expense-list' %}" class="btn btn-quiet">Bekor qilish</a>
   </form>
 {% endblock %}

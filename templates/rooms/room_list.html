@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
- <h2>Xonalar</h2>
+  <h1>Xonalar</h1>
 {% load humanize %}
-<a href="{% url 'room-add' %}" class="btn">Xona qo'shish</a>
-<div class="table-responsive">
-<table>
-  <tr><th>Xona raqami</th><th>Kunlik narx</th><th></th></tr>
-  {% for r in rooms %}
-  <tr>
-    <td>{{ r.number }}</td>
-    <td>{{ r.price_per_night|intcomma }}</td>
-    <td><a href="{% url 'room-edit' r.pk %}">Tahrirlash</a></td>
-  </tr>
-  {% endfor %}
-</table>
-</div>
+  <div class="toolbar">
+    <a href="{% url 'room-add' %}" class="btn btn-primary" style="margin-left:auto;">Xona qo'shish</a>
+  </div>
+
+  <div class="table-responsive">
+  <table>
+    <tr><th>Xona raqami</th><th>Kunlik narx</th><th></th></tr>
+    {% for r in rooms %}
+    <tr>
+      <td>{{ r.number }}</td>
+      <td>{{ r.price_per_night|intcomma }}</td>
+      <td><a href="{% url 'room-edit' r.pk %}" class="btn btn-edit">Tahrirlash</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
 {% endblock %}

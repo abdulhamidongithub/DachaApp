@@ -66,6 +66,18 @@
     th { color: var(--ink-soft); font-weight: 500; font-size: 0.82rem; }
     tr:last-child td { border-bottom: none; }
 
+   .table-responsive { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: var(--radius); }
+    th, td { text-align: left; padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+    th:last-child, td:last-child {
+      position: sticky;
+      right: 0;
+      background: var(--surface);
+      box-shadow: -6px 0 8px -6px rgba(0,0,0,0.12);
+      z-index: 1;
+    }
+
     .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.8rem; }
     .badge.paid { background: #E4EEE9; color: var(--available); }
     .badge.unpaid { background: #F6E5E1; color: var(--booked); }
@@ -123,6 +135,7 @@
   font-size: 0.95rem;
   background: var(--surface);
 }
+    th, td { text-align: left; padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); font-size: 0.92rem; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -130,7 +143,7 @@
   <p class="brand">Dacha CRM</p>
  {% with p=request.path %}
 <nav>
-  <a href="{% url 'booking-list' %}" class="{% if '/rooms/' not in p and '/expenses/' not in p and '/report/' not in p %}active{% endif %}">Bandlovlar</a>
+  <a href="{% url 'booking-list' %}" class="{% if '/rooms/' not in p and '/expenses/' not in p and '/report/' not in p %}active{% endif %}">Buyurtmalar</a>
   <a href="{% url 'room-list' %}" class="{% if '/rooms/' in p %}active{% endif %}">Xonalar</a>
   <a href="{% url 'expense-list' %}" class="{% if '/expenses/' in p %}active{% endif %}">Xarajatlar</a>
   <a href="{% url 'report' %}" class="{% if '/report/' in p %}active{% endif %}">Hisobot</a>

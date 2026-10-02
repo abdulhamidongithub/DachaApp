@@ -5,7 +5,7 @@
 <form method="post">
   {% csrf_token %}
   <p><label for="id_number">Xona raqami <span class="required-mark">*</span></label>{{ form.number }}</p>
-  <p><label for="id_price_per_night">Kunlik narx <span class="optional-tag">(ixtiyoriy)</span></label>{{ form.price_per_night|intcomma }}</p>
-  <button type="submit" class="btn">Saqlash</button>
+  <p><label for="id_price_per_night">Kunlik narx <span class="optional-tag">(ixtiyoriy)</span></label>{{ form.price_per_night }}</p>
+ <button type="submit" class="btn btn-primary">Saqlash</button>
 </form>
 {% endblock %}

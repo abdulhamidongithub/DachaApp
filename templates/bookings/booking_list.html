@@ -19,7 +19,7 @@
       <button type="submit" class="btn btn-quiet">Filtrlash</button>
       <a href="{% url 'booking-list' %}" class="btn btn-quiet">Tozalash</a>
     </form>
-    <a href="{% url 'booking-add' %}" class="btn" style="margin-left:auto;">Yangi buyurtma</a>
+   <a href="{% url 'booking-add' %}" class="btn btn-primary" style="margin-left:auto;">Yangi buyurtma</a>
   </div>
 
   <div class="table-responsive">
@@ -30,17 +30,19 @@
       <td>{{ b.room }}</td>
       <td>{{ b.guest_name }}</td>
       <td>{{ b.guest_phone }}</td>
-      <td>{{ b.check_in }} → {{ b.check_out }}</td>
+     <td>{{ b.check_in|date:"d.m.Y" }} → {{ b.check_out|date:"d.m.Y" }}</td>
       <td>{{ b.net_total|intcomma }}</td>
       <td>
         {% if b.is_paid_in_full %}<span class="badge paid">To'langan</span>
         {% else %}<span class="badge unpaid">Qarz: {{ b.balance_due|intcomma }}</span>{% endif %}
       </td>
       <td>
-        <a href="{% url 'booking-edit' b.pk %}">Tahrirlash</a>
-        <form method="post" action="{% url 'booking-cancel' b.pk %}" style="display:inline;">
-          {% csrf_token %}<button type="submit" class="btn-quiet btn" style="padding:0.2rem 0.5rem;">Bekor qilish</button>
-        </form>
+        <div class="row-actions">
+          <a href="{% url 'booking-edit' b.pk %}" class="btn btn-edit">Tahrirlash</a>
+          <form method="post" action="{% url 'booking-cancel' b.pk %}">
+            {% csrf_token %}<button type="submit" class="btn btn-danger">Bekor qilish</button>
+          </form>
+        </div>
       </td>
     </tr>
     {% empty %}
