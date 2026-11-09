@@ -7,17 +7,41 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db.models import Q
 from django.core.validators import MinValueValidator
+from django.contrib.auth.hashers import make_password
+
+class Resort(models.Model):
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    resort = models.ForeignKey(Resort, on_delete=models.CASCADE, related_name="members")
+
+    def __str__(self):
+        return f"{self.user} → {self.resort}"
+
+class EmailOTP(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otp")
+    code_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(default=timezone.now)
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=10)
 
 class Room(models.Model):
-    number = models.CharField(
-        max_length=20,
-        unique=True,
-        help_text="Xona raqami yoki nomi, masalan: '101'",
-    )
+    number = models.CharField(max_length=20, help_text="Xona raqami yoki nomi, masalan: '101'")
     price_per_night = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(1)])
+    resort = models.ForeignKey("Resort", on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         ordering = ["number"]
+        constraints = [
+            models.UniqueConstraint(fields=["resort", "number"], name="unique_room_number_per_resort"),
+        ]
 
     def __str__(self):
         return f"{self.number}"
@@ -35,6 +59,7 @@ class Booking(models.Model):
     room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True, related_name="bookings")
     guest_name = models.CharField(max_length=50)
     guest_phone = models.CharField(max_length=20)
+    resort = models.ForeignKey("Resort", on_delete=models.CASCADE, null=True, blank=True)
 
     check_in = models.DateField(help_text="Kirish sanasi")
     check_out = models.DateField(help_text="Chiqish sanasi (shu kunning tuni band qilinmaydi)")
@@ -134,6 +159,7 @@ class Expense(models.Model):
     amount = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="other")
     note = models.CharField(max_length=255, blank=True)
+    resort = models.ForeignKey("Resort", on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="expenses"
     )
