@@ -1,0 +1,24 @@
+{% extends "registration/auth_base.html" %}
+{% block title %}Emailni tasdiqlash — Kurort Tizimi{% endblock %}
+{% block card %}
+  <h1>Emailni tasdiqlang</h1>
+  <p class="tag"><strong>{{ email }}</strong> manziliga 6 xonali kod yubordik. Kod 10 daqiqa amal qiladi.</p>
+
+  {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <label for="id_code">Tasdiqlash kodi <span class="req">*</span></label>
+    {{ form.code }}
+    {% if form.code.errors %}<div class="field-error">{{ form.code.errors.0 }}</div>{% endif %}
+    <button type="submit">Tasdiqlash</button>
+  </form>
+
+  <form method="post" action="{% url 'resend-code' %}" style="margin-top:1rem; text-align:center;">
+    {% csrf_token %}
+    <button type="submit" class="link">Kodni qayta yuborish</button>
+  </form>
+  <p class="alt">Xat kelmadimi? "Spam" papkasini ham tekshiring.</p>
+
+  <style>#id_code { letter-spacing:0.4em; font-size:1.3rem; text-align:center; }</style>
+{% endblock %}

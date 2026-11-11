@@ -1,0 +1,31 @@
+{% extends "registration/auth_base.html" %}
+{% block title %}Ro'yxatdan o'tish — Kurort Tizimi{% endblock %}
+{% block card %}
+  <h1>Ro'yxatdan o'tish</h1>
+  <p class="tag">Kurortingiz uchun hisob yarating</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    <label for="id_resort_name">Kurort nomi <span class="req">*</span></label>
+    {{ form.resort_name }}
+    {% if form.resort_name.errors %}<div class="field-error">{{ form.resort_name.errors.0 }}</div>{% endif %}
+
+    <label for="id_email">Email <span class="req">*</span></label>
+    {{ form.email }}
+    {% if form.email.errors %}<div class="field-error">{{ form.email.errors.0 }}</div>{% endif %}
+
+    <label for="id_password">Parol <span class="req">*</span></label>
+    {{ form.password }}
+    {% if form.password.errors %}<div class="field-error">{{ form.password.errors.0 }}</div>{% endif %}
+
+    <label for="id_password2">Parolni takrorlang <span class="req">*</span></label>
+    {{ form.password2 }}
+    {% if form.password2.errors %}<div class="field-error">{{ form.password2.errors.0 }}</div>{% endif %}
+
+    <button type="submit">Davom etish</button>
+  </form>
+  <p class="alt">Hisobingiz bormi? <a href="{% url 'login' %}">Kirish</a></p>
+{% endblock %}

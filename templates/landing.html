@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kurort Tizimi — bandlovlarni qog'ozsiz boshqaring</title>
+  <meta name="description" content="Kichik kurortlar uchun oddiy bandlov tizimi: band va bo'sh kunlarni kalendarda ko'ring, to'lovlar va xarajatlarni yuriting.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#F5F1E8; --surface:#fff; --ink:#1E2A25; --ink-soft:#5B6660; --primary:#2F4B3C;
+            --accent:#C9A05C; --booked:#B9483A; --available:#3E7C7C; --border:#E2DBC9; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; font-family:'Inter',sans-serif; color:var(--ink); background:var(--bg); line-height:1.55; }
+    h1,h2,h3,.brand { font-family:'Fraunces',serif; font-weight:600; line-height:1.15; margin:0; }
+    .wrap { max-width:1040px; margin:0 auto; padding:0 1.5rem; }
+
+    .top { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 0; gap:1rem; }
+    .brand { font-size:1.3rem; color:var(--primary); text-decoration:none; }
+    .top nav { display:flex; align-items:center; gap:1.4rem; font-size:0.92rem; }
+    .top nav a { text-decoration:none; color:var(--ink-soft); }
+    .top nav a:hover { color:var(--ink); }
+    .btn { display:inline-block; padding:0.65rem 1.2rem; border-radius:6px; text-decoration:none; font-size:0.95rem; font-weight:500; }
+    .btn:hover { filter:brightness(0.95); }
+    .btn-primary { background:var(--accent); color:#fff !important; }
+    .btn-quiet { border:1px solid var(--border); color:var(--ink) !important; }
+
+    .hero { display:grid; grid-template-columns:1.1fr 0.9fr; gap:3rem; align-items:center; padding:3.5rem 0 4.5rem; }
+    .hero h1 { font-size:clamp(2rem,4.6vw,3.2rem); color:var(--primary); }
+    .hero p.lead { font-size:1.08rem; color:var(--ink-soft); margin:1.25rem 0 1.75rem; max-width:34rem; }
+    .actions { display:flex; gap:0.75rem; flex-wrap:wrap; }
+    .hint { margin-top:1rem; font-size:0.85rem; color:var(--ink-soft); }
+
+    .mock { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.25rem; }
+    .mock-title { font-family:'Fraunces',serif; font-size:1rem; margin-bottom:0.8rem; }
+    .mock-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+    .mock-grid .dow { text-align:center; font-size:0.72rem; color:var(--ink-soft); padding-bottom:2px; }
+    .mock-grid span.d { aspect-ratio:1; display:grid; place-items:center; font-size:0.8rem; border-radius:4px; background:var(--bg); }
+    .mock-grid .b { background:var(--booked); color:#fff; }
+    .mock-grid .s { background:var(--available); color:#fff; }
+    .legend { display:flex; gap:1rem; margin-top:0.9rem; font-size:0.78rem; color:var(--ink-soft); flex-wrap:wrap; }
+    .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:0.3rem; }
+
+    .section { padding:3.5rem 0; border-top:1px solid var(--border); }
+    .section > h2 { font-size:1.7rem; color:var(--primary); margin-bottom:0.5rem; }
+    .section > p.sub { color:var(--ink-soft); margin:0 0 2.25rem; max-width:36rem; }
+    .features { display:grid; grid-template-columns:repeat(3,1fr); gap:2.25rem 2rem; }
+    .feat { border-top:2px solid var(--primary); padding-top:0.9rem; }
+    .feat h3 { font-size:1.1rem; margin-bottom:0.4rem; }
+    .feat p { margin:0; color:var(--ink-soft); font-size:0.93rem; }
+
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; list-style:none; padding:0; margin:0; counter-reset:s; }
+    .steps li { counter-increment:s; }
+    .steps li::before { content:counter(s); display:block; font-family:'Fraunces',serif; font-size:2.4rem; color:var(--accent); line-height:1; margin-bottom:0.6rem; }
+    .steps h3 { font-size:1.1rem; margin-bottom:0.35rem; }
+    .steps p { margin:0; color:var(--ink-soft); font-size:0.93rem; }
+
+    .cta { background:var(--primary); color:#fff; border-radius:10px; padding:2.25rem 2.5rem; display:flex; justify-content:space-between; align-items:center; gap:1.5rem; flex-wrap:wrap; margin-bottom:3rem; }
+    .cta h2 { font-size:1.5rem; }
+    .cta p { margin:0.3rem 0 0; color:#D7E0D4; font-size:0.95rem; }
+
+    footer { border-top:1px solid var(--border); padding:1.75rem 0 2.5rem; font-size:0.88rem; color:var(--ink-soft); }
+    footer .row { display:flex; justify-content:space-between; gap:1.5rem; flex-wrap:wrap; }
+    footer a { color:var(--ink-soft); text-decoration:none; margin-right:1.2rem; }
+    footer a:hover { color:var(--ink); }
+
+    @media (max-width:800px) {
+      .hero { grid-template-columns:1fr; gap:2rem; padding:1.5rem 0 3rem; }
+      .features, .steps { grid-template-columns:1fr; }
+      .top nav .hide-sm { display:none; }
+      .cta { padding:1.75rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="{% url 'landing' %}">Kurort Tizimi</a>
+      <nav>
+        <a class="hide-sm" href="#features">Imkoniyatlar</a>
+        <a class="hide-sm" href="#how">Qanday ishlaydi</a>
+        <a href="{% url 'login' %}">Kirish</a>
+        <a class="btn btn-primary" href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>Bir xonaga ikki marta bandlov — endi bo'lmaydi.</h1>
+        <p class="lead">Kichik kurortlar uchun oddiy bandlov tizimi. Band va bo'sh kunlarni kalendarda ko'ring, to'lovlarni va xarajatlarni bir joyda yuriting. Qog'ozdan voz keching.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+          <a class="btn btn-quiet" href="{% url 'login' %}">Kirish</a>
+        </div>
+        <p class="hint">Telefondan ham qulay ishlaydi.</p>
+      </div>
+
+      <div class="mock" aria-hidden="true">
+        <div class="mock-title">Xona 101 — band kunlar</div>
+        <div class="mock-grid" id="mock">
+          <div class="dow">Ya</div><div class="dow">Du</div><div class="dow">Se</div><div class="dow">Cho</div>
+          <div class="dow">Pa</div><div class="dow">Ju</div><div class="dow">Sh</div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--booked)"></i>Band</span>
+          <span><i style="background:var(--available)"></i>Siz tanlagan kunlar</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <h2>Kundalik ishni yengillashtiradi</h2>
+      <p class="sub">Telefon qo'ng'irog'i kelganda javob berish uchun kerakli hamma narsa bir joyda.</p>
+      <div class="features">
+        <div class="feat"><h3>Ikki marta bandlovdan himoya</h3><p>Band kunlar qizil rangda ko'rinadi, tizim band xonani qayta bandlashga yo'l qo'ymaydi.</p></div>
+        <div class="feat"><h3>Bir necha kunga bandlov</h3><p>Kalendarda birinchi va oxirgi kunni bosing — narx xona narxi bo'yicha avtomatik hisoblanadi.</p></div>
+        <div class="feat"><h3>To'lovlar va chegirmalar</h3><p>Oldindan to'lov, qo'shimcha xizmat va chegirmani yozing. Qoldiq summa o'zi hisoblanadi.</p></div>
+        <div class="feat"><h3>Xarajatlar hisobi</h3><p>Har bir xarajatni turi va sanasi bilan yozing, kerakli davr bo'yicha qidiring.</p></div>
+        <div class="feat"><h3>Hisobot va grafik</h3><p>Tanlangan davr uchun bandlovlar soni, tushum, xarajat va sof foydani grafikda ko'ring.</p></div>
+        <div class="feat"><h3>Ma'lumotlaringiz faqat sizniki</h3><p>Har bir kurortning ma'lumotlari alohida saqlanadi va boshqalarga ko'rinmaydi.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <h2>Qanday ishlaydi</h2>
+      <p class="sub">Boshlash uchun bir necha daqiqa yetarli.</p>
+      <ol class="steps">
+        <li><h3>Ro'yxatdan o'ting</h3><p>Kurort nomi va emailingizni kiriting, emailga kelgan kod bilan tasdiqlang.</p></li>
+        <li><h3>Xonalarni qo'shing</h3><p>Xona raqami va kunlik narxini kiriting.</p></li>
+        <li><h3>Bandlovlarni yozing</h3><p>Mehmon ismi, telefoni va sanalarni kiriting — band kunlar kalendarda darhol ko'rinadi.</p></li>
+      </ol>
+    </section>
+
+    <div class="cta">
+      <div>
+        <h2>Boshlashga tayyormi?</h2>
+        <p>Ro'yxatdan o'ting va birinchi xonangizni qo'shing.</p>
+      </div>
+      <a class="btn btn-primary" href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+    </div>
+
+    <footer>
+      <div class="row">
+        <div>
+          <a href="#features">Imkoniyatlar</a>
+          <a href="#how">Qanday ishlaydi</a>
+          <a href="{% url 'login' %}">Kirish</a>
+          <a href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+        </div>
+        <div>
+          <!-- TODO: replace with your real contacts -->
+          <a href="mailto:info@example.uz">info@example.uz</a>
+          <a href="https://t.me/your_username">Telegram</a>
+        </div>
+      </div>
+      <p style="margin:1.25rem 0 0;">© Kurort Tizimi</p>
+    </footer>
+  </div>
+
+  <script>
+    // Sample calendar for the hero (purely decorative)
+    const grid = document.getElementById('mock');
+    const booked = [5,6,7,12,13,19,20,21,22,23], picked = [27,28,29];
+    for (let d = 1; d <= 30; d++) {
+      const c = document.createElement('span');
+      c.className = 'd' + (booked.includes(d) ? ' b' : picked.includes(d) ? ' s' : '');
+      c.textContent = d;
+      grid.appendChild(c);
+    }
+  </script>
+</body>
+</html>

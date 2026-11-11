@@ -2,13 +2,20 @@ from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from myapp import views
+from myapp import accounts_views, views
 from myapp.forms import UzbekAuthenticationForm
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", views.BookingListView.as_view(), name="booking-list"),
+    path("", accounts_views.LandingView.as_view(), name="landing"),
+    path("login/", auth_views.LoginView.as_view(template_name="login.html",authentication_form=UzbekAuthenticationForm,), name="login"),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("register/", accounts_views.RegisterView.as_view(), name="register"),
+    path("verify/", accounts_views.VerifyEmailView.as_view(), name="verify-email"),
+    path("verify/resend/", accounts_views.ResendCodeView.as_view(), name="resend-code"),
+
+    path("bookings/", views.BookingListView.as_view(), name="booking-list"),
     path("bookings/add/", views.BookingCreateView.as_view(), name="booking-add"),
     path("bookings/<int:pk>/edit/", views.BookingUpdateView.as_view(), name="booking-edit"),
     path("bookings/<int:pk>/cancel/", views.BookingCancelView.as_view(), name="booking-cancel"),
@@ -26,9 +33,6 @@ urlpatterns = [
     path("expenses/add/", views.ExpenseCreateView.as_view(), name="expense-add"),
     path("expenses/<int:pk>/edit/", views.ExpenseUpdateView.as_view(), name="expense-edit"),
     path("expenses/<int:pk>/delete/", views.ExpenseDeleteView.as_view(), name="expense-delete"),
-    path("report/", views.ReportView.as_view(), name="report"),
-
-    path("login/", auth_views.LoginView.as_view(template_name="login.html",authentication_form=UzbekAuthenticationForm,), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("report/", views.ReportView.as_view(), name="report")
 ]
 

@@ -3,6 +3,9 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 from .models import Room, Booking, Payment, Expense
 
@@ -37,8 +40,9 @@ class BookingForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"rows": 2}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, resort=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["room"].queryset = Room.objects.filter(resort=resort) if resort else Room.objects.none()
         if self.instance and self.instance.pk and self.instance.guest_phone:
             digits = re.sub(r'\D', '', self.instance.guest_phone)
             self.fields['phone_local'].initial = digits[-9:]
@@ -99,6 +103,19 @@ class RoomForm(forms.ModelForm):
         fields = ["number", "price_per_night"]
         labels = {"number": "Xona raqami", "price_per_night": "Kunlik narx"}
 
+    def __init__(self, *args, resort=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.resort = resort
+
+    def clean_number(self):
+        number = self.cleaned_data["number"]
+        qs = Room.objects.filter(resort=self.resort, number=number)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Bunday raqamli xona allaqachon mavjud.")
+        return number
+
 
 class UzbekAuthenticationForm(AuthenticationForm):
     error_messages = {
@@ -122,3 +139,47 @@ class ExpenseForm(forms.ModelForm):
             "date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "note": forms.TextInput(attrs={"placeholder": "Masalan: bozordan sabzavot"}),
         }
+
+REQUIRED = {"required": "Bu maydonni to'ldiring."}
+
+
+class RegisterForm(forms.Form):
+    resort_name = forms.CharField(label="Kurort nomi", max_length=100, error_messages=REQUIRED)
+    email = forms.EmailField(label="Email", error_messages={**REQUIRED, "invalid": "Email noto'g'ri kiritilgan."})
+    password = forms.CharField(
+        label="Parol", min_length=8, widget=forms.PasswordInput,
+        error_messages={**REQUIRED, "min_length": "Parol kamida 8 ta belgidan iborat bo'lishi kerak."},
+    )
+    password2 = forms.CharField(label="Parolni takrorlang", widget=forms.PasswordInput, error_messages=REQUIRED)
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        existing = User.objects.filter(username__iexact=email).first()
+        # Only an unverified leftover from an earlier sign-up attempt may register again
+        if existing and (existing.is_active or not hasattr(existing, "email_otp")):
+            raise ValidationError("Bu email bilan hisob allaqachon mavjud.")
+        return email
+
+    def clean(self):
+        cleaned = super().clean()
+        p1, p2 = cleaned.get("password"), cleaned.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", "Parollar bir xil emas.")
+        return cleaned
+
+
+class OTPForm(forms.Form):
+    code = forms.CharField(
+        label="Tasdiqlash kodi", min_length=6, max_length=6,
+        widget=forms.TextInput(attrs={
+            "inputmode": "numeric", "autocomplete": "one-time-code", "maxlength": "6", "placeholder": "123456",
+        }),
+        error_messages={"required": "Kodni kiriting.", "min_length": "Kod 6 ta raqamdan iborat.",
+                        "max_length": "Kod 6 ta raqamdan iborat."},
+    )
+
+    def clean_code(self):
+        code = self.cleaned_data["code"].strip()
+        if not code.isdigit():
+            raise ValidationError("Kod faqat raqamlardan iborat bo'lishi kerak.")
+        return code
