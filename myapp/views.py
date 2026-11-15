@@ -324,7 +324,7 @@ class ReportView(ResortMixin, TemplateView):
             resort=resort, is_cancelled=False, check_in__gte=date_from, check_in__lte=date_to
         ).count()
         earnings = Payment.objects.filter(
-            booking_resort=resort, paid_at__date__gte=date_from, paid_at__date__lte=date_to
+            booking__resort=resort, paid_at__date__gte=date_from, paid_at__date__lte=date_to
         ).aggregate(t=Sum("amount"))["t"] or 0
         spent = Expense.objects.filter(
             resort=resort, date__gte=date_from, date__lte=date_to
